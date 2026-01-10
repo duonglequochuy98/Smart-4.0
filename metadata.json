@@ -1,0 +1,7 @@
+{
+  "name": "Smart Tây Thạnh 4.0",
+  "description": "Cổng dịch vụ hành chính công thông minh Phường Tây Thạnh tích hợp trợ lý ảo AI hỗ trợ giải quyết thủ tục 24/7.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
