@@ -154,7 +154,7 @@ const App: React.FC = () => {
           <h1 className="text-xl sm:text-2xl font-black text-slate-900 leading-tight tracking-tight">
             Chào mừng đến với<br />
             <span className="text-red-600 text-2xl sm:text-3xl block mt-2 leading-tight">
-             Trung tâm Phục vụ Hành chính công phường <span className="whitespace-nowrap">Tây Thạnh</span> Smart 4.0
+             Trung tâm Phục vụ Hành chính công <span className="whitespace-nowrap">Tây Thạnh</span> Smart 4.0
             </span>
           </h1>
           <p className="text-[13px] sm:text-[14px] text-slate-500 font-medium leading-relaxed max-w-[300px] mx-auto opacity-80">
