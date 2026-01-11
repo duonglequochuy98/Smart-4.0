@@ -192,10 +192,10 @@ const App: React.FC = () => {
                 {/* Title */}
         <div className="text-center space-y-2">
           <h1 className="text-slate-700 text-base sm:text-lg font-medium">
-            Trung tâm Phục vụ Hành chính công
+            Trung tâm Phục vụ Hành chính công phường
           </h1>
           <h2 className="text-red-600 font-bold text-2xl sm:text-3xl tracking-wide">
-           Phường Tây Thạnh
+          Tây Thạnh
           </h2>
         </div>
         
