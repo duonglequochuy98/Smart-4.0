@@ -181,14 +181,24 @@ const App: React.FC = () => {
     </div>
   );
 
-  const renderLanding = () => (
-    <div className="h-full bg-[#FDFDFD] relative flex flex-col overflow-y-auto no-sTrung tâm Phục vụ Hành chính công<br />
-            <span className="text-red-600 font-bold text-xl sm:text-2xl whitespace-nowrap">Tây Thạnh</span>
-          </h1>
-          <div className="inline-block px-4 py-1.5 bg-slate-100 rounded-full">
-            <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.25em]">Ứng dụng công nghệ 4.0</p>
-          </div>
-        </div>
+ const renderLanding = () => (
+  <div className="h-full bg-[#FDFDFD] relative flex flex-col overflow-y-auto">
+    <div className="flex flex-col items-center justify-center gap-3 p-6">
+      <h1 className="text-center text-lg sm:text-xl font-semibold text-slate-800">
+        Trung tâm Phục vụ Hành chính công
+        <br />
+        <span className="text-red-600 font-bold text-xl sm:text-2xl whitespace-nowrap">
+          Tây Thạnh
+        </span>
+      </h1>
+      <div className="inline-block px-4 py-1.5 bg-slate-100 rounded-full">
+        <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.25em]">
+          Ứng dụng công nghệ 4.0
+        </p>
+      </div>
+    </div>
+  </div>
+);
         
         <div className="w-full grid grid-cols-4 gap-3 sm:gap-5 mb-10 px-2 sm:px-6">
           <FeatureCard onClick={() => setCurrentScreen(AppState.CHAT)} icon={<Bot />} label="Trợ lý AI" color="bg-red-50 text-red-600" />
