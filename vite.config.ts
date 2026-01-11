@@ -4,10 +4,6 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, '.', '');
-    
-    // Lấy API key từ env hoặc process.env (cho Vercel)
-    const apiKey = env.GEMINI_API_KEY || process.env.GEMINI_API_KEY;
-    
     return {
       server: {
         port: 3000,
@@ -15,7 +11,8 @@ export default defineConfig(({ mode }) => {
       },
       plugins: [react()],
       define: {
-        'process.env.GEMINI_API_KEY': JSON.stringify(apiKey)
+        'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
+        'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
       },
       resolve: {
         alias: {

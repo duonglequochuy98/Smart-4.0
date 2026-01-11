@@ -15,7 +15,9 @@ import {
   Ghost, 
   Smile, 
   Zap, 
-  CircuitBoard 
+  CircuitBoard,
+  Copy,
+  Check
 } from 'lucide-react';
 
 interface AIAssistantProps {
@@ -46,6 +48,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ onBack }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const [selectedAvatar, setSelectedAvatar] = useState<AvatarOption>(AVATAR_OPTIONS[0]);
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -70,6 +73,13 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ onBack }) => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleCopy = (text: string, index: number) => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopiedIndex(index);
+      setTimeout(() => setCopiedIndex(null), 2000);
+    });
   };
 
   const formatMessageContent = (text: string) => {
@@ -127,12 +137,23 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ onBack }) => {
               }`}>
                 {m.role === 'user' ? <User size={16} /> : selectedAvatar.icon}
               </div>
-              <div className={`px-4 py-3 rounded-[20px] text-[14px] leading-[1.6] shadow-sm ${
-                m.role === 'user' 
-                  ? 'bg-red-600 text-white rounded-tr-none' 
-                  : 'bg-white border border-slate-100 text-slate-700 rounded-tl-none'
-              }`}>
-                {formatMessageContent(m.text)}
+              <div className="relative group">
+                <div className={`px-4 py-3 rounded-[20px] text-[14px] leading-[1.6] shadow-sm ${
+                  m.role === 'user' 
+                    ? 'bg-red-600 text-white rounded-tr-none' 
+                    : 'bg-white border border-slate-100 text-slate-700 rounded-tl-none pr-10'
+                }`}>
+                  {formatMessageContent(m.text)}
+                </div>
+                {m.role === 'model' && (
+                  <button 
+                    onClick={() => handleCopy(m.text, i)}
+                    className="absolute top-2 right-2 p-1.5 rounded-lg bg-slate-50 text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
+                    title="Sao chép nội dung"
+                  >
+                    {copiedIndex === i ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
+                  </button>
+                )}
               </div>
             </div>
           </div>
