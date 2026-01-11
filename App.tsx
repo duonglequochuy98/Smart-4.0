@@ -154,7 +154,7 @@ const App: React.FC = () => {
           <h1 className="text-xl sm:text-2xl font-black text-slate-900 leading-tight tracking-tight">
             Chào mừng đến với<br />
             <span className="text-red-600 text-2xl sm:text-3xl block mt-2 leading-tight">
-             Trung tâm phục vụ hành chính công phườngphường <span className="whitespace-nowrap">Tây Thạnh</span> Smart 4.0
+             Trung tâm Phục vụ Hành chính công phường <span className="whitespace-nowrap">Tây Thạnh</span> Smart 4.0
             </span>
           </h1>
           <p className="text-[13px] sm:text-[14px] text-slate-500 font-medium leading-relaxed max-w-[300px] mx-auto opacity-80">
@@ -182,25 +182,7 @@ const App: React.FC = () => {
   );
 
   const renderLanding = () => (
-    <div className="h-full bg-[#FDFDFD] relative flex flex-col overflow-y-auto no-scrollbar animate-in fade-in duration-300 pb-24">
-      <div className="sticky top-0 p-5 pt-7 flex justify-between items-center z-30 bg-white/80 backdrop-blur-lg border-b border-slate-100/60">
-        <div className="flex items-center gap-3">
-          <button onClick={() => setCurrentScreen(AppState.WELCOME)} className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-600 hover:bg-slate-100 active:scale-90 transition-all"><ArrowLeft size={20} /></button>
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 bg-red-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-red-600/20"><Building2 size={16} /></div>
-            <div className="flex flex-col -space-y-1"><span className="font-black text-[15px] tracking-tight text-red-600">SMART</span><span className="text-[9px] font-bold text-slate-400 tracking-widest uppercase whitespace-nowrap">Tây Thạnh</span></div>
-          </div>
-        </div>
-        <div className="flex items-center gap-2"><button className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:text-slate-600 transition-colors"><UserCircle size={22} /></button></div>
-      </div>
-      
-      <div className="px-6 py-8 sm:py-12 flex flex-col items-center">
-        <div className="relative w-full max-w-[90px] sm:max-w-[110px] aspect-square rounded-[24px] sm:rounded-[30px] bg-red-600 overflow-hidden flex items-center justify-center mb-8 shadow-2xl shadow-red-900/10">
-          <img src="https://zalo-article-photo.zadn.vn/84f864bb2bf3c2ad9be2.pnj" alt="Logo" className="w-full h-full object-cover scale-95" />
-        </div>
-        <div className="text-center space-y-2 mb-10">
-          <h1 className="text-xl sm:text-2xl font-black text-[#1A1C1E] tracking-tight leading-tight uppercase">
-            Cổng hành chính công<br />
+    <div className="h-full bg-[#FDFDFD] relative flex flex-col overflow-y-auto no-sHành chính công<br />
             <span className="text-red-600 font-bold text-xl sm:text-2xl whitespace-nowrap">Phường Tây Thạnh</span>
           </h1>
           <div className="inline-block px-4 py-1.5 bg-slate-100 rounded-full">
