@@ -195,7 +195,7 @@ const App: React.FC = () => {
             Trung tâm Phục vụ Hành chính công
           </h1>
           <h2 className="text-red-600 font-bold text-2xl sm:text-3xl tracking-wide">
-            Tây Thạnh
+           Phường Tây Thạnh
           </h2>
         </div>
         
