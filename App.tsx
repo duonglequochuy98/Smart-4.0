@@ -182,7 +182,7 @@ const App: React.FC = () => {
   );
 
   const renderLanding = () => (
-    <div className="h-full bg-[#FDFDFD] relative flex flex-col overflow-y-auto no-s Trung tâm Phục vụ Hành chính công<br />
+    <div className="h-full bg-[#FDFDFD] relative flex flex-col overflow-y-auto no-sTrung tâm Phục vụ Hành chính công<br />
             <span className="text-red-600 font-bold text-xl sm:text-2xl whitespace-nowrap">Tây Thạnh</span>
           </h1>
           <div className="inline-block px-4 py-1.5 bg-slate-100 rounded-full">
