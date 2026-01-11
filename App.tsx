@@ -181,22 +181,37 @@ const App: React.FC = () => {
   );
 
   const renderLanding = () => (
-    <div className="h-full bg-[#FDFDFD] relative flex flex-col overflow-y-auto">
-      <div className="flex-1 pb-24">
-        <div className="flex flex-col items-center justify-center gap-3 p-6">
-          <h1 className="text-center text-lg sm:text-xl font-semibold text-slate-800">
-            Trung tâm Phục vụ Hành chính công
-            <br />
-            <span className="text-red-600 font-bold text-xl sm:text-2xl whitespace-nowrap">
-              Tây Thạnh
-            </span>
-          </h1>
-          <div className="inline-block px-4 py-1.5 bg-slate-100 rounded-full">
-            <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.25em]">
-              Ứng dụng công nghệ 4.0
-            </p>
-          </div>
+  <div className="h-full bg-gradient-to-br from-slate-50 to-blue-50 relative flex flex-col overflow-y-auto">
+    <div className="flex-1 pb-24">
+      {/* Header Section */}
+      <div className="flex flex-col items-center justify-center gap-4 p-6 pt-12">
+        {/* Logo/Icon (optional) */}
+        <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center shadow-lg">
+          <span className="text-white text-2xl font-bold">TT</span>
         </div>
+                {/* Title */}
+        <div className="text-center space-y-2">
+          <h1 className="text-slate-700 text-base sm:text-lg font-medium">
+            Trung tâm Phục vụ Hành chính công
+          </h1>
+          <h2 className="text-red-600 font-bold text-2xl sm:text-3xl tracking-wide">
+            Tây Thạnh
+          </h2>
+        </div>
+        
+        {/* Badge */}
+        <div className="inline-flex items-center gap-2 px-5 py-2 bg-white rounded-full shadow-sm border border-slate-200">
+          <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+          <p className="text-slate-600 text-xs font-semibold uppercase tracking-wider">
+            Ứng dụng công nghệ 4.0
+          </p>
+        </div>
+      </div>
+      
+      {/* Content can continue here */}
+    </div>
+  </div>
+);
         
         <div className="w-full grid grid-cols-4 gap-3 sm:gap-5 mb-10 px-2 sm:px-6">
           <FeatureCard onClick={() => setCurrentScreen(AppState.CHAT)} icon={<Bot />} label="Trợ lý AI" color="bg-red-50 text-red-600" />
