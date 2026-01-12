@@ -132,29 +132,27 @@ const App: React.FC = () => {
     );
   };
 
-  const renderWelcome = () => (
+    const renderWelcome = () => (
     <div className="flex flex-col h-full bg-white overflow-hidden animate-in fade-in duration-500">
       <div className="relative h-[42%] shrink-0 overflow-hidden">
         <img src="https://iwater.vn/Image/Picture/New/UBND-phuong-tay-thanh-tan-phu.jpg" alt="UBND Phường Tây Thạnh" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-white via-white/10 to-transparent"></div>
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-4 w-full px-6">
            <div className="w-20 h-20 sm:w-24 sm:h-24 bg-white rounded-[28px] sm:rounded-[32px] shadow-2xl flex items-center justify-center border-4 border-red-50 animate-bounce [animation-duration:3s]">
-             <Building2 size={40} className="text-red-600 sm:size-48" />
+             <Building2 size={40} className="text-red-600 sm:size-60" />
            </div>
         </div>
       </div>
       <div className="flex-1 px-8 sm:px-12 flex flex-col items-center text-center -mt-10 relative z-10 justify-center">
-        <div className="space-y-4 mb-8 sm:mb-10">
+        <div className="space-y-4 mb-8 sm:mb-10 w-full">
           <div className="flex items-center justify-center gap-3 mb-1">
             <span className="h-[1px] w-8 bg-slate-200"></span>
-            <span className="text-[10px] font-black text-red-600 uppercase tracking-[0.4em]">Xin chào</span>
+            <span className="text-[10px] font-black text-slate-800 uppercase tracking-[0.4em]">Chào mừng đến với</span>
             <span className="h-[1px] w-8 bg-slate-200"></span>
           </div>
-          <h1 className="text-xl sm:text-2xl font-black text-slate-900 leading-tight tracking-tight">
-            Chào mừng đến với<br />
-            <span className="text-red-600 text-2xl sm:text-3xl block mt-2 leading-tight">
-             Trung tâm Phục vụ Hành chính công <span className="whitespace-nowrap">Tây Thạnh</span> Smart 4.0
-            </span>
+          <h1 className="text-xl sm:text-2xl font-black text-red-700 leading-[1.3] tracking-tight w-full max-w-[420px] mx-auto">
+            <span className="block whitespace-nowrap">Trung tâm Phục vụ Hành chính công</span>
+            <span className="block mt-1">Phường Tây Thạnh Smart 4.0</span>
           </h1>
           <p className="text-[13px] sm:text-[14px] text-slate-500 font-medium leading-relaxed max-w-[300px] mx-auto opacity-80">
             Hệ thống thông minh, minh bạch và hiệu quả vì sự hài lòng của Nhân dân.
