@@ -54,9 +54,6 @@ const App: React.FC = () => {
   const [fabPosition, setFabPosition] = useState({ x: 310, y: 580 });
   const [isDragging, setIsDragging] = useState(false);
   const fabDragStartPos = useRef({ x: 0, y: 0 });
-  coconst [fabPosition, setFabPosition] = useState({ x: 310, y: 580 });
-  const [isDragging, setIsDragging] = useState(false);
-  const fabDragStartPos = useRef({ x: 0, y: 0 });
   const fabRef = useRef<HTMLButtonElement>(null);
   const fabHasMoved = useRef(false);
 
