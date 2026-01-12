@@ -216,19 +216,14 @@ const App: React.FC = () => {
   <div className="bg-slate-900 rounded-[32px] p-7 text-white relative overflow-hidden shadow-2xl border border-white/5">
     <div className="absolute top-0 right-0 w-48 h-48 bg-red-600/10 rounded-full -mr-24 -mt-24 blur-3xl"></div>
     <div className="flex items-center justify-between mb-8 relative z-10">
-      <h3 className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">Chỉ số phục vụ </h3>
-    </div>
-  </div>
-</div>
-
-</div>  {/* Đóng tất cả các div đã mở */}
-</div>
-);  {/* Giữ dấu ); ở đây */}
+      <h3 className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">Chỉ số phục vụ</h3>
       <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-full border border-white/10">
         <CalendarDays size={12} className="text-white/60" />
         <span className="text-[10px] font-black">{todayDate}</span>
       </div>
     </div>
+  </div>
+</div>
             <div className="grid grid-cols-3 gap-4 relative z-10">
               <div className="space-y-1.5">
                 <div className="flex items-center gap-2 text-emerald-400"><CheckCircle size={14} /><span className="text-[10px] font-black uppercase">Xử lý</span></div>
