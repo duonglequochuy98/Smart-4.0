@@ -42,11 +42,11 @@ export const ReportView: React.FC<ReportViewProps> = ({ onBack, onOpenChat }) =>
     
     const criteriaList = [
       { id: 1, label: "Công khai, Minh bạch", score: pseudoRandom(seed + 1, 18, 18), total: 18, status: "Hoàn thành 100%" },
-      { id: 2, label: "Tiến độ giải quyết", score: pseudoRandom(seed + 2, 19.44, 20), total: 20, status: `Sớm hạn trên ${pseudoRandom(seed + 2, 98, 100)}%` },
+      { id: 2, label: "Tiến độ giải quyết", score: pseudoRandom(seed + 2, 18.44, 20), total: 20, status: `Sớm hạn trên ${pseudoRandom(seed + 2, 98, 100)}%` },
       { id: 3, label: "Dịch vụ trực tuyến", score: pseudoRandom(seed + 3, 20, 20), total: 22, status: `DV công: ${pseudoRandom(seed + 3, 90, 95)}%` },
       { id: 4, label: "Mức độ hài lòng", score: (pseudoRandom(seed + 4, 170, 180) / 10).toFixed(1), total: 18, isRating: true },
       // Fixed: Removed extra argument from pseudoRandom call (was pseudoRandom(seed + 5, 16, 19.35, 22))
-      { id: 5, label: "Số hóa hồ sơ", score: pseudoRandom(seed + 5, 18.85, 22), total: 22, status: "Hoàn thành 100%" }
+      { id: 5, label: "Số hóa hồ sơ", score: pseudoRandom(seed + 5, 16.85, 22), total: 22, status: "Hoàn thành 100%" }
     ];
 
     const calculatedTotal = criteriaList.reduce((acc, curr) => acc + Number(curr.score), 0);
