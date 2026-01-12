@@ -31,7 +31,7 @@ const PROCEDURES = [
     name: 'Đăng ký Hộ kinh doanh, doanh nghiệp', 
     category: 'Kinh tế', 
     time: '03 ngày', 
-    fee: 'Miễn phí', 
+    fee: 'Có phí', 
     hot: false,
     url: 'https://dichvucong.gov.vn/p/home/dvc-chi-tiet-thu-tuc-hanh-chinh.html?ma_thu_tuc=1.001612'
   },
