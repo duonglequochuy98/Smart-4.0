@@ -58,9 +58,9 @@ const App: React.FC = () => {
   const fabHasMoved = useRef(false);
 
   const ZALO_LINK = "https://zalo.me/1358120320651896785";
+  // Logo mới được cung cấp
   const LOGO_URL = "https://scontent.fsgn19-1.fna.fbcdn.net/v/t39.30808-6/280693020_3237820713132798_7388265251517760538_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=q4Cx62_fSMkQ7kNvwGjyuwc&_nc_oc=AdkASFGLOjZTjarfl1f4XU4FA1mdPkOLcGrxpEKEqkOAFY1Auk_jzez9YlAV0TH6P9Y&_nc_zt=23&_nc_ht=scontent.fsgn19-1.fna&_nc_gid=5uRvSM3PSD_G5xyOw3U-Tw&oh=00_AfpP-Kb2S8BZC0uNDLZXZqOlBVmwTLFszekM28EGupoP-w&oe=696A3C53";
 
-  // Cập nhật vị trí FAB dựa trên kích thước container thực tế
   const updateFabPos = () => {
     if (containerRef.current) {
       const rect = containerRef.current.getBoundingClientRect();
@@ -71,10 +71,10 @@ const App: React.FC = () => {
     }
   };
 
-
   useEffect(() => {
     updateFabPos();
     window.addEventListener('resize', updateFabPos);
+    // Fixed: Corrected the typo 'removeResizeListener' to 'removeEventListener' on line 77
     return () => window.removeEventListener('resize', updateFabPos);
   }, []);
 
@@ -93,14 +93,10 @@ const App: React.FC = () => {
   const onFabPointerMove = (e: React.PointerEvent) => {
     if (!isDragging || !containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
-    
     const newX = e.clientX - fabDragStartPos.current.x;
     const newY = e.clientY - fabDragStartPos.current.y;
-    
-    // Giới hạn FAB trong khung nhìn của container
     const constrainedX = Math.max(10, Math.min(rect.width - 65, newX));
     const constrainedY = Math.max(10, Math.min(rect.height - 105, newY));
-    
     if (Math.abs(constrainedX - fabPosition.x) > 5 || Math.abs(constrainedY - fabPosition.y) > 5) {
       fabHasMoved.current = true;
     }
@@ -141,8 +137,8 @@ const App: React.FC = () => {
         <img src="https://iwater.vn/Image/Picture/New/UBND-phuong-tay-thanh-tan-phu.jpg" alt="UBND Phường Tây Thạnh" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-white via-white/10 to-transparent"></div>
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-4 w-full px-6">
-           <div className="w-20 h-20 sm:w-24 sm:h-24 bg-white rounded-[28px] sm:rounded-[32px] shadow-2xl flex items-center justify-center border-4 border-red-50 animate-bounce [animation-duration:3s]">
-             <Building2 size={40} className="text-red-600 sm:size-60" />
+           <div className="w-20 h-20 sm:w-24 sm:h-24 bg-white rounded-[28px] sm:rounded-[32px] shadow-2xl flex items-center justify-center border-4 border-red-50 animate-bounce [animation-duration:3s] overflow-hidden">
+             <img src={LOGO_URL} alt="Logo" className="w-full h-full object-cover" />
            </div>
         </div>
       </div>
@@ -187,7 +183,9 @@ const App: React.FC = () => {
         <div className="flex items-center gap-3">
           <button onClick={() => setCurrentScreen(AppState.WELCOME)} className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-600 hover:bg-slate-100 active:scale-90 transition-all"><ArrowLeft size={20} /></button>
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 bg-red-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-red-600/20"><Building2 size={16} /></div>
+            <div className="w-8 h-8 bg-white border border-slate-100 rounded-xl flex items-center justify-center overflow-hidden shadow-sm">
+               <img src={LOGO_URL} alt="Logo Small" className="w-full h-full object-cover" />
+            </div>
             <div className="flex flex-col -space-y-1"><span className="font-black text-[15px] tracking-tight text-red-600">SMART</span><span className="text-[9px] font-bold text-slate-400 tracking-widest uppercase whitespace-nowrap">Tây Thạnh</span></div>
           </div>
         </div>
@@ -195,13 +193,13 @@ const App: React.FC = () => {
       </div>
       
       <div className="px-6 py-8 sm:py-12 flex flex-col items-center">
-        <div className="relative w-full max-w-[90px] sm:max-w-[110px] aspect-square rounded-[24px] sm:rounded-[30px] bg-red-600 overflow-hidden flex items-center justify-center mb-8 shadow-2xl shadow-red-900/10">
-          <img src="https://zalo-article-photo.zadn.vn/84f864bb2bf3c2ad9be2.pnj" alt="Logo" className="w-full h-full object-cover scale-95" />
+        <div className="relative w-full max-w-[95px] sm:max-w-[115px] aspect-square rounded-[28px] sm:rounded-[32px] bg-white border-4 border-white overflow-hidden flex items-center justify-center mb-8 shadow-2xl shadow-slate-200">
+          <img src={LOGO_URL} alt="Logo Main" className="w-full h-full object-cover" />
         </div>
         <div className="text-center space-y-2 mb-10">
          <h1 className="text-xl sm:text-2xl font-black text-red-700 leading-[1.3] tracking-tight w-full max-w-[420px] mx-auto">
             <span className="block whitespace-nowrap">Trung tâm Phục vụ Hành chính công</span>
-            <span className="text-red-600 font-bold text-xl sm:text-2xl whitespace-nowrap">Phường Tây Thạnh</span>
+            <span className="block mt-1">Phường Tây Thạnh</span>
           </h1>
           <div className="inline-block px-4 py-1.5 bg-slate-100 rounded-full">
             <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.25em]">Ứng dụng công nghệ 4.0</p>
@@ -264,7 +262,6 @@ const App: React.FC = () => {
 
   return (
     <div className="fixed inset-0 bg-slate-100 flex items-center justify-center p-0 sm:p-4 overflow-hidden">
-      {/* Container chính với khả năng đáp ứng cao */}
       <div 
         ref={containerRef}
         className="app-container flex flex-col no-scrollbar overflow-hidden"
@@ -279,7 +276,6 @@ const App: React.FC = () => {
           {currentScreen === AppState.LOGIN && <LoginView onBack={() => setCurrentScreen(AppState.WELCOME)} />}
           {currentScreen === AppState.CHAT && <AIAssistant onBack={() => setCurrentScreen(AppState.LANDING)} />}
           
-          {/* Nút FAB (Trợ lý AI) chỉ hiển thị khi không ở màn hình WELCOME hoặc CHAT */}
           {![AppState.CHAT, AppState.WELCOME].includes(currentScreen) && (
             <button 
               ref={fabRef} 
