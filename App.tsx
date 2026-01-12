@@ -197,21 +197,15 @@ const App: React.FC = () => {
           </h2>
         </div>
         
-        {/* Badge */}
-        <div className="inline-flex items-center gap-2 px-5 py-2 bg-white rounded-full shadow-sm border border-slate-200">
-          <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-          <p className="text-slate-600 text-xs font-semibold uppercase tracking-wider">
-            Ứng dụng công nghệ 4.0
-          </p>
-        </div>
-      </div>
-      
-      {/* Content can continue here */}
-    </div>
-  </div>
-);
-        
-   <div className="w-full grid grid-cols-4 gap-3 sm:gap-5 mb-10 px-2 sm:px-6">
+       {/* Badge */}
+<div className="inline-flex items-center gap-2 px-5 py-2 bg-white rounded-full shadow-sm border border-slate-200">
+  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+  <p className="text-slate-600 text-xs font-semibold uppercase tracking-wider">
+    Ứng dụng công nghệ 4.0
+  </p>
+</div>
+
+<div className="w-full grid grid-cols-4 gap-3 sm:gap-5 mb-10 px-2 sm:px-6">
   <FeatureCard onClick={() => setCurrentScreen(AppState.CHAT)} icon={<Bot />} label="Trợ lý AI" color="bg-red-50 text-red-600" />
   <FeatureCard onClick={() => setCurrentScreen(AppState.TRACKING)} icon={<Search />} label="Tra cứu" color="bg-emerald-50 text-emerald-600" />
   <FeatureCard onClick={() => setCurrentScreen(AppState.SUBMIT)} icon={<FileUp />} label="Nộp hồ sơ" color="bg-orange-50 text-orange-600" />
@@ -223,6 +217,13 @@ const App: React.FC = () => {
     <div className="absolute top-0 right-0 w-48 h-48 bg-red-600/10 rounded-full -mr-24 -mt-24 blur-3xl"></div>
     <div className="flex items-center justify-between mb-8 relative z-10">
       <h3 className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">Chỉ số phục vụ </h3>
+    </div>
+  </div>
+</div>
+
+</div>  {/* Đóng tất cả các div đã mở */}
+</div>
+);  {/* Giữ dấu ); ở đây */}
       <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-full border border-white/10">
         <CalendarDays size={12} className="text-white/60" />
         <span className="text-[10px] font-black">{todayDate}</span>
