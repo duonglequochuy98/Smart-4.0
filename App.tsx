@@ -197,8 +197,8 @@ const App: React.FC = () => {
           <img src="https://zalo-article-photo.zadn.vn/84f864bb2bf3c2ad9be2.pnj" alt="Logo" className="w-full h-full object-cover scale-95" />
         </div>
         <div className="text-center space-y-2 mb-10">
-          <h1 className="text-xl sm:text-2xl font-black text-[#1A1C1E] tracking-tight leading-tight uppercase">
-            Trung tâm Phục vụ Hành chính công<br />
+         <h1 className="text-xl sm:text-2xl font-black text-red-700 leading-[1.3] tracking-tight w-full max-w-[420px] mx-auto">
+            <span className="block whitespace-nowrap">Trung tâm Phục vụ Hành chính công</span>
             <span className="text-red-600 font-bold text-xl sm:text-2xl whitespace-nowrap">Phường Tây Thạnh</span>
           </h1>
           <div className="inline-block px-4 py-1.5 bg-slate-100 rounded-full">
