@@ -211,23 +211,23 @@ const App: React.FC = () => {
   </div>
 );
         
-        <div className="w-full grid grid-cols-4 gap-3 sm:gap-5 mb-10 px-2 sm:px-6">
-          <FeatureCard onClick={() => setCurrentScreen(AppState.CHAT)} icon={<Bot />} label="Trợ lý AI" color="bg-red-50 text-red-600" />
-          <FeatureCard onClick={() => setCurrentScreen(AppState.TRACKING)} icon={<Search />} label="Tra cứu" color="bg-emerald-50 text-emerald-600" />
-          <FeatureCard onClick={() => setCurrentScreen(AppState.SUBMIT)} icon={<FileUp />} label="Nộp hồ sơ" color="bg-orange-50 text-orange-600" />
-          <FeatureCard onClick={handleOpenZalo} icon={<MessageCircle />} label="Zalo OA" color="bg-blue-50 text-blue-600" />
-        </div>
+    <div className="w-full grid grid-cols-4 gap-3 sm:gap-5 mb-10 px-2 sm:px-6">
+  <FeatureCard onClick={() => setCurrentScreen(AppState.CHAT)} icon={<Bot />} label="Trợ lý AI" color="bg-red-50 text-red-600" />
+  <FeatureCard onClick={() => setCurrentScreen(AppState.TRACKING)} icon={<Search />} label="Tra cứu" color="bg-emerald-50 text-emerald-600" />
+  <FeatureCard onClick={() => setCurrentScreen(AppState.SUBMIT)} icon={<FileUp />} label="Nộp hồ sơ" color="bg-orange-50 text-orange-600" />
+  <FeatureCard onClick={handleOpenZalo} icon={<MessageCircle />} label="Zalo OA" color="bg-blue-50 text-blue-600" />
+</div>
 
-        <div className="px-6 mb-10 sm:px-10">
-          <div className="bg-slate-900 rounded-[32px] p-7 text-white relative overflow-hidden shadow-2xl border border-white/5">
-            <div className="absolute top-0 right-0 w-48 h-48 bg-red-600/10 rounded-full -mr-24 -mt-24 blur-3xl"></div>
-            <div className="flex items-center justify-between mb-8 relative z-10">
-              <h3 className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">Chỉ số phục vụ </h3>
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-full border border-white/10">
-                <CalendarDays size={12} className="text-white/60" />
-                <span className="text-[10px] font-black">{todayDate}</span>
-              </div>
-            </div>
+<div className="px-6 mb-10 sm:px-10">
+  <div className="bg-slate-900 rounded-[32px] p-7 text-white relative overflow-hidden shadow-2xl border border-white/5">
+    <div className="absolute top-0 right-0 w-48 h-48 bg-red-600/10 rounded-full -mr-24 -mt-24 blur-3xl"></div>
+    <div className="flex items-center justify-between mb-8 relative z-10">
+      <h3 className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">Chỉ số phục vụ </h3>
+      <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-full border border-white/10">
+        <CalendarDays size={12} className="text-white/60" />
+        <span className="text-[10px] font-black">{todayDate}</span>
+      </div>
+    </div>
             <div className="grid grid-cols-3 gap-4 relative z-10">
               <div className="space-y-1.5">
                 <div className="flex items-center gap-2 text-emerald-400"><CheckCircle size={14} /><span className="text-[10px] font-black uppercase">Xử lý</span></div>
