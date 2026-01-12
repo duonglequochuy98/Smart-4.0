@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { AppState } from './types';
 import { FeatureCard } from './components/FeatureCard';
@@ -132,7 +133,7 @@ const App: React.FC = () => {
     );
   };
 
-    const renderWelcome = () => (
+  const renderWelcome = () => (
     <div className="flex flex-col h-full bg-white overflow-hidden animate-in fade-in duration-500">
       <div className="relative h-[42%] shrink-0 overflow-hidden">
         <img src="https://iwater.vn/Image/Picture/New/UBND-phuong-tay-thanh-tan-phu.jpg" alt="UBND Phường Tây Thạnh" className="w-full h-full object-cover" />
@@ -179,97 +180,70 @@ const App: React.FC = () => {
   );
 
   const renderLanding = () => (
-  <div className="h-full bg-gradient-to-br from-slate-50 to-blue-50 relative flex flex-col overflow-y-auto">
-    <div className="flex-1 pb-24">
-      {/* Header Section */}
-      <div className="flex flex-col items-center justify-center gap-4 p-6 pt-12">
-        {/* Logo/Icon */}
-        <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center shadow-lg">
-          <span className="text-white text-2xl font-bold">TT</span>
+    <div className="h-full bg-[#FDFDFD] relative flex flex-col overflow-y-auto no-scrollbar animate-in fade-in duration-300 pb-24">
+      <div className="sticky top-0 p-5 pt-7 flex justify-between items-center z-30 bg-white/80 backdrop-blur-lg border-b border-slate-100/60">
+        <div className="flex items-center gap-3">
+          <button onClick={() => setCurrentScreen(AppState.WELCOME)} className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-600 hover:bg-slate-100 active:scale-90 transition-all"><ArrowLeft size={20} /></button>
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 bg-red-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-red-600/20"><Building2 size={16} /></div>
+            <div className="flex flex-col -space-y-1"><span className="font-black text-[15px] tracking-tight text-red-600">SMART</span><span className="text-[9px] font-bold text-slate-400 tracking-widest uppercase whitespace-nowrap">Tây Thạnh</span></div>
+          </div>
         </div>
-        
-        {/* Title */}
-        <div className="text-center space-y-2">
-          <h1 className="text-slate-700 text-base sm:text-lg font-medium">
-            Trung tâm Phục vụ Hành chính công phường
-          </h1>
-          <h2 className="text-red-600 font-bold text-2xl sm:text-3xl tracking-wide">
-            Tây Thạnh
-          </h2>
-        </div>
-        
-        {/* Badge */}
-        <div className="inline-flex items-center gap-2 px-5 py-2 bg-white rounded-full shadow-sm border border-slate-200">
-          <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-          <p className="text-slate-600 text-xs font-semibold uppercase tracking-wider">
-            Ứng dụng công nghệ 4.0
-          </p>
-        </div>
+        <div className="flex items-center gap-2"><button className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:text-slate-600 transition-colors"><UserCircle size={22} /></button></div>
       </div>
-
-      <div className="w-full grid grid-cols-4 gap-3 sm:gap-5 mb-10 px-2 sm:px-6">
-        <FeatureCard onClick={() => setCurrentScreen(AppState.CHAT)} icon={<Bot />} label="Trợ lý AI" color="bg-red-50 text-red-600" />
-        <FeatureCard onClick={() => setCurrentScreen(AppState.TRACKING)} icon={<Search />} label="Tra cứu" color="bg-emerald-50 text-emerald-600" />
-        <FeatureCard onClick={() => setCurrentScreen(AppState.SUBMIT)} icon={<FileUp />} label="Nộp hồ sơ" color="bg-orange-50 text-orange-600" />
-        <FeatureCard onClick={handleOpenZalo} icon={<MessageCircle />} label="Zalo OA" color="bg-blue-50 text-blue-600" />
+      
+      <div className="px-6 py-8 sm:py-12 flex flex-col items-center">
+        <div className="relative w-full max-w-[90px] sm:max-w-[110px] aspect-square rounded-[24px] sm:rounded-[30px] bg-red-600 overflow-hidden flex items-center justify-center mb-8 shadow-2xl shadow-red-900/10">
+          <img src="https://zalo-article-photo.zadn.vn/84f864bb2bf3c2ad9be2.pnj" alt="Logo" className="w-full h-full object-cover scale-95" />
+        </div>
+        <div className="text-center space-y-2 mb-10">
+          <h1 className="text-xl sm:text-2xl font-black text-[#1A1C1E] tracking-tight leading-tight uppercase">
+            Cổng hành chính công<br />
+            <span className="text-red-600 font-bold text-xl sm:text-2xl whitespace-nowrap">Phường Tây Thạnh</span>
+          </h1>
+          <div className="inline-block px-4 py-1.5 bg-slate-100 rounded-full">
+            <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.25em]">Ứng dụng công nghệ 4.0</p>
+          </div>
+        </div>
+        
+        <div className="w-full grid grid-cols-4 gap-3 sm:gap-5 mb-10 px-2 sm:px-6">
+          <FeatureCard onClick={() => setCurrentScreen(AppState.CHAT)} icon={<Bot />} label="Trợ lý AI" color="bg-red-50 text-red-600" />
+          <FeatureCard onClick={() => setCurrentScreen(AppState.TRACKING)} icon={<Search />} label="Tra cứu" color="bg-emerald-50 text-emerald-600" />
+          <FeatureCard onClick={() => setCurrentScreen(AppState.SUBMIT)} icon={<FileUp />} label="Nộp hồ sơ" color="bg-orange-50 text-orange-600" />
+          <FeatureCard onClick={handleOpenZalo} icon={<MessageCircle />} label="Zalo OA" color="bg-blue-50 text-blue-600" />
+        </div>
       </div>
 
       <div className="px-6 mb-10 sm:px-10">
         <div className="bg-slate-900 rounded-[32px] p-7 text-white relative overflow-hidden shadow-2xl border border-white/5">
           <div className="absolute top-0 right-0 w-48 h-48 bg-red-600/10 rounded-full -mr-24 -mt-24 blur-3xl"></div>
-          
           <div className="flex items-center justify-between mb-8 relative z-10">
-            <h3 className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">Chỉ số phục vụ</h3>
+            <h3 className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">Chỉ số phục vụ </h3>
             <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-full border border-white/10">
               <CalendarDays size={12} className="text-white/60" />
               <span className="text-[10px] font-black">{todayDate}</span>
             </div>
           </div>
-
           <div className="grid grid-cols-3 gap-4 relative z-10">
             <div className="space-y-1.5">
-              <div className="flex items-center gap-2 text-emerald-400">
-                <CheckCircle size={14} />
-                <span className="text-[10px] font-black uppercase">Xử lý</span>
-              </div>
-              <div className="flex items-baseline gap-1">
-                <span className="text-xl font-black">9.683</span>
-              </div>
+              <div className="flex items-center gap-2 text-emerald-400"><CheckCircle size={14} /><span className="text-[10px] font-black uppercase">Xử lý</span></div>
+              <div className="flex items-baseline gap-1"><span className="text-xl font-black">9.683</span></div>
             </div>
-            
             <div className="space-y-1.5">
-              <div className="flex items-center gap-2 text-yellow-400">
-                <Users size={14} />
-                <span className="text-[10px] font-black uppercase">Hài lòng</span>
-              </div>
-              <div className="flex items-baseline gap-1">
-                <span className="text-xl font-black">99.2</span>
-                <span className="text-[10px] font-bold text-white/30">%</span>
-              </div>
+              <div className="flex items-center gap-2 text-yellow-400"><Users size={14} /><span className="text-[10px] font-black uppercase">Hài lòng</span></div>
+              <div className="flex items-baseline gap-1"><span className="text-xl font-black">99.2</span><span className="text-[10px] font-bold text-white/30">%</span></div>
             </div>
-            
             <div className="space-y-1.5">
-              <div className="flex items-center gap-2 text-amber-500">
-                <Trophy size={14} />
-                <span className="text-[10px] font-black uppercase">Hạng cao nhất</span>
-              </div>
-              <div className="flex items-baseline gap-1">
-                <span className="text-xl font-black text-amber-400">02</span>
-                <span className="text-[10px] font-bold text-white/30">/168</span>
-              </div>
+              <div className="flex items-center gap-2 text-amber-500"><Trophy size={14} /><span className="text-[10px] font-black uppercase">Hạng cao nhất </span></div>
+              <div className="flex items-baseline gap-1"><span className="text-xl font-black text-amber-400">02</span><span className="text-[10px] font-bold text-white/30">/168</span></div>
             </div>
           </div>
-          
           <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-between relative z-10">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center shadow-lg shadow-red-600/30">
-                <Zap size={14} fill="white" />
-              </div>
-              <span className="text-[11px] font-bold text-white/80">Dẫn đầu chỉ số phục vụ</span>
-            </div>
-            <button onClick={() => setCurrentScreen(AppState.REPORT)} className="text-[10px] font-black uppercase text-red-500 hover:text-red-400 transition-colors flex items-center gap-1">
-              Chi tiết <ChevronRight size={12} />
-            </button>
+             <div className="flex items-center gap-2.5">
+               <div className="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center shadow-lg shadow-red-600/30"><Zap size={14} fill="white" /></div>
+               <span className="text-[11px] font-bold text-white/80">Dẫn đầu chỉ số phục vụ</span>
+             </div>
+             <button onClick={() => setCurrentScreen(AppState.REPORT)} className="text-[10px] font-black uppercase text-red-500 hover:text-red-400 transition-colors flex items-center gap-1">Chi tiết <ChevronRight size={12} /></button>
           </div>
         </div>
       </div>
@@ -277,24 +251,18 @@ const App: React.FC = () => {
       <div className="px-6 mb-8 sm:px-10">
         <button onClick={handleOpenZalo} className="w-full p-6 bg-[#0068FF] text-white rounded-[28px] flex items-center justify-between group shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all border border-blue-400/20">
           <div className="flex items-center gap-5">
-            <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-inner">
-              <MessageCircle size={22} className="text-[#0068FF] fill-current" />
-            </div>
-            <div className="text-left">
-              <h4 className="text-[15px] font-bold">Cần hỗ trợ trực tiếp?</h4>
-              <p className="text-[11px] text-white/70 font-medium mt-0.5">Chúng tôi trả lời ngay lập tức</p>
-            </div>
+            <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-inner"><MessageCircle size={22} className="text-[#0068FF] fill-current" /></div>
+            <div className="text-left"><h4 className="text-[15px] font-bold">Cần hỗ trợ trực tiếp?</h4><p className="text-[11px] text-white/70 font-medium mt-0.5">Chúng tôi trả lời ngay lập tức</p></div>
           </div>
-          <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center group-hover:translate-x-1.5 transition-transform">
-            <ArrowRight size={20} />
-          </div>
+          <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center group-hover:translate-x-1.5 transition-transform"><ArrowRight size={20} /></div>
         </button>
       </div>
     </div>
-  </div>
-);
+  );
+
   return (
     <div className="fixed inset-0 bg-slate-100 flex items-center justify-center p-0 sm:p-4 overflow-hidden">
+      {/* Container chính với khả năng đáp ứng cao */}
       <div 
         ref={containerRef}
         className="app-container flex flex-col no-scrollbar overflow-hidden"
@@ -309,6 +277,7 @@ const App: React.FC = () => {
           {currentScreen === AppState.LOGIN && <LoginView onBack={() => setCurrentScreen(AppState.WELCOME)} />}
           {currentScreen === AppState.CHAT && <AIAssistant onBack={() => setCurrentScreen(AppState.LANDING)} />}
           
+          {/* Nút FAB (Trợ lý AI) chỉ hiển thị khi không ở màn hình WELCOME hoặc CHAT */}
           {![AppState.CHAT, AppState.WELCOME].includes(currentScreen) && (
             <button 
               ref={fabRef} 
