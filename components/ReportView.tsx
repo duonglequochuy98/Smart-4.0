@@ -67,7 +67,7 @@ export const ReportView: React.FC<ReportViewProps> = ({ onBack, onOpenChat }) =>
       totalScore: finalTotalScore, 
       trendData, 
       criteria: criteriaList,
-      ranking: "69/168"
+      ranking: "51/168"
     };
   }, [filterMonth, filterYear]);
 
