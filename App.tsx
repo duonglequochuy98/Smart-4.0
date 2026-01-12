@@ -198,7 +198,7 @@ const App: React.FC = () => {
         </div>
         <div className="text-center space-y-2 mb-10">
           <h1 className="text-xl sm:text-2xl font-black text-[#1A1C1E] tracking-tight leading-tight uppercase">
-            Cổng hành chính công<br />
+            Trung tâm Phục vụ Hành chính công<br />
             <span className="text-red-600 font-bold text-xl sm:text-2xl whitespace-nowrap">Phường Tây Thạnh</span>
           </h1>
           <div className="inline-block px-4 py-1.5 bg-slate-100 rounded-full">
