@@ -197,7 +197,7 @@ const App: React.FC = () => {
           </h2>
         </div>
         
-       {/* Badge */}
+   {/* Badge */}
 <div className="inline-flex items-center gap-2 px-5 py-2 bg-white rounded-full shadow-sm border border-slate-200">
   <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
   <p className="text-slate-600 text-xs font-semibold uppercase tracking-wider">
@@ -215,6 +215,7 @@ const App: React.FC = () => {
 <div className="px-6 mb-10 sm:px-10">
   <div className="bg-slate-900 rounded-[32px] p-7 text-white relative overflow-hidden shadow-2xl border border-white/5">
     <div className="absolute top-0 right-0 w-48 h-48 bg-red-600/10 rounded-full -mr-24 -mt-24 blur-3xl"></div>
+    
     <div className="flex items-center justify-between mb-8 relative z-10">
       <h3 className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">Chỉ số phục vụ</h3>
       <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-full border border-white/10">
@@ -222,13 +223,20 @@ const App: React.FC = () => {
         <span className="text-[10px] font-black">{todayDate}</span>
       </div>
     </div>
+
+    <div className="grid grid-cols-3 gap-4 relative z-10">
+      <div className="space-y-1.5">
+        <div className="flex items-center gap-2 text-emerald-400">
+          <CheckCircle size={14} />
+          <span className="text-[10px] font-black uppercase">Xử lý</span>
+        </div>
+        <div className="flex items-baseline gap-1">
+          <span className="text-xl font-black">9.683</span>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
-            <div className="grid grid-cols-3 gap-4 relative z-10">
-              <div className="space-y-1.5">
-                <div className="flex items-center gap-2 text-emerald-400"><CheckCircle size={14} /><span className="text-[10px] font-black uppercase">Xử lý</span></div>
-                <div className="flex items-baseline gap-1"><span className="text-xl font-black">9.683</span></div>
-              </div>
               <div className="space-y-1.5">
                 <div className="flex items-center gap-2 text-yellow-400"><Users size={14} /><span className="text-[10px] font-black uppercase">Hài lòng</span></div>
                 <div className="flex items-baseline gap-1"><span className="text-xl font-black">99.2</span><span className="text-[10px] font-bold text-white/30">%</span></div>
