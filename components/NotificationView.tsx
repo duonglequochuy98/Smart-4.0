@@ -49,9 +49,9 @@ const MOCK_NEWS: NewsItem[] = [
   },
   {
     id: 4,
-    title: "Lịch tiêm chủng mở rộng cho trẻ em tháng 09/2024",
+    title: "Lịch tiêm chủng mở rộng cho trẻ em tháng 01/2026",
     summary: "Danh sách các loại vaccine và thời gian tiêm chủng tại Trạm y tế Phường Tây Thạnh.",
-    date: "09:15 - 12/08/2024",
+    date: "09:15 - 12/01/2026",
     category: "Thông báo",
     url: 'https://thuvienphapluat.vn/chinh-sach-phap-luat-moi/vn/ho-tro-phap-luat/tu-van-phap-luat/92028/lich-nghi-le-quoc-khanh-2-9-2025-nguoi-lao-dong-duoc-nghi-le-4-ngay-hay-3-ngay',
     isRead: true
