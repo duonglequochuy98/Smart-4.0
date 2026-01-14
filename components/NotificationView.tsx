@@ -30,15 +30,6 @@ const MOCK_NEWS: NewsItem[] = [
   },
   {
     id: 2,
-    title: "Triển khai đợt cao điểm cấp CCCD gắn chip và định danh điện tử VNeID",
-    summary: "Hỗ trợ người dân cài đặt và kích hoạt tài khoản định danh điện tử mức độ 2 tại trụ sở Công an Phường.",
-    date: "08:00 - 01/01/2026",
-    category: "Sự kiện",
-    url: 'https://thuvienphapluat.vn/chinh-sach-phap-luat-moi/vn/ho-tro-phap-luat/tu-van-phap-luat/92028/lich-nghi-le-quoc-khanh-2-9-2025-nguoi-lao-dong-duoc-nghi-le-4-ngay-hay-3-ngay',
-    isRead: false
-  },
-  {
-    id: 3,
     title: "Hướng dẫn nộp hồ sơ trực tuyến qua Cổng dịch vụ công mới",
     summary: "Các bước đơn giản để nộp hồ sơ chứng thực bản sao và đăng ký khai sinh ngay tại nhà.",
     date: "05:00 - 05/01/2026",
@@ -48,16 +39,7 @@ const MOCK_NEWS: NewsItem[] = [
     isImportant: true
   },
   {
-    id: 4,
-    title: "Lịch tiêm chủng mở rộng cho trẻ em tháng 01/2026",
-    summary: "Danh sách các loại vaccine và thời gian tiêm chủng tại Trạm y tế Phường Tây Thạnh.",
-    date: "09:15 - 12/01/2026",
-    category: "Thông báo",
-    url: 'https://thuvienphapluat.vn/chinh-sach-phap-luat-moi/vn/ho-tro-phap-luat/tu-van-phap-luat/92028/lich-nghi-le-quoc-khanh-2-9-2025-nguoi-lao-dong-duoc-nghi-le-4-ngay-hay-3-ngay',
-    isRead: true
-  },
-  {
-    id: 5,
+    id: 3,
     title: "Cập nhật ứng dụng Smart Tây Thạnh phiên bản 4.0.2",
     summary: "Bổ sung tính năng Trợ lý ảo AI thông minh và tra cứu chỉ số phục vụ trực tuyến.",
     date: "09:15 - 01/01/2026",
