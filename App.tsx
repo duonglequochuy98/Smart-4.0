@@ -56,8 +56,8 @@ const INITIAL_NEWS: NewsItem[] = [
   {
     id: 1,
     title: "Thông báo về việc nghỉ lễ Tết dương lịch 01/01/2026",
-    summary: "UBND Phường Tây Thạnh thông báo lịch nghỉ lễ và trực giải quyết hồ sơ cấp bách trong dịp lễ Quốc khánh.",
-    date: "10:30 - 25/12/2025",
+    summary: "UBND Phường Tây Thạnh thông báo lịch nghỉ lễ và trực giải quyết hồ sơ cấp bách.",
+    date: "10:30 - 25/08/2024",
     category: "Thông báo",
     url: 'https://thuvienphapluat.vn/chinh-sach-phap-luat-moi/vn/ho-tro-phap-luat/tu-van-phap-luat/92028/lich-nghi-le-quoc-khanh-2-9-2025-nguoi-lao-dong-duoc-nghi-le-4-ngay-hay-3-ngay',
     isRead: false,
@@ -67,7 +67,7 @@ const INITIAL_NEWS: NewsItem[] = [
     id: 3,
     title: "Hướng dẫn nộp hồ sơ trực tuyến qua Cổng dịch vụ công mới",
     summary: "Các bước đơn giản để nộp hồ sơ chứng thực bản sao và đăng ký khai sinh ngay tại nhà.",
-    date: "05:00 - 05/01/2026",
+    date: "05:00 - 05/01/2025",
     category: "Tin tức",
     url: 'https://www.youtube.com/watch?v=HSmgjZ4Q6dM',
     isRead: true,
@@ -208,7 +208,7 @@ const App: React.FC = () => {
             <span className="block mt-1">Phường Tây Thạnh Smart 4.0</span>
           </h1>
           <p className="text-[13px] sm:text-[14px] text-slate-500 font-medium leading-relaxed max-w-[300px] mx-auto opacity-80">
-            Hệ thống thông minh, minh bạch và hiệu quả vì sự hài lòng của Nhân dân.
+            Hệ thống thông minh, minh bạch và hiệu quả phục vụ Nhân dân Thành phố Hồ Chí Minh.
           </p>
         </div>
         <div className="w-full space-y-3.5 mb-8 max-w-sm">
@@ -220,11 +220,6 @@ const App: React.FC = () => {
             <Bot size={20} className="text-red-600" />
             <span>Hỏi Trợ lý ảo AI ngay</span>
           </button>
-        </div>
-        <div className="grid grid-cols-3 gap-6 w-full pt-4 opacity-40 max-w-xs">
-          <div className="flex flex-col items-center gap-1.5"><ShieldCheck size={18} className="text-slate-600" /><span className="text-[9px] font-bold uppercase tracking-tighter">Bảo mật</span></div>
-          <div className="flex flex-col items-center gap-1.5"><Zap size={18} className="text-slate-600" /><span className="text-[9px] font-bold uppercase tracking-tighter">Tốc độ</span></div>
-          <div className="flex flex-col items-center gap-1.5"><Sparkles size={18} className="text-slate-600" /><span className="text-[9px] font-bold uppercase tracking-tighter">Tiện ích</span></div>
         </div>
       </div>
       <div className="pb-6 text-center shrink-0 opacity-30"><p className="text-[9px] font-bold text-slate-500 uppercase tracking-[0.2em]">Phiên bản 4.0.2 - 2026</p></div>
@@ -256,7 +251,7 @@ const App: React.FC = () => {
             <span className="text-red-600 font-bold text-xl sm:text-2xl whitespace-nowrap">Phường Tây Thạnh</span>
           </h1>
           <div className="inline-block px-4 py-1.5 bg-slate-100 rounded-full">
-            <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.25em]">Ứng dụng công nghệ 4.0</p>
+            <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.25em]">Thành phố Hồ Chí Minh</p>
           </div>
         </div>
         
@@ -289,28 +284,11 @@ const App: React.FC = () => {
               <div className="flex items-baseline gap-1"><span className="text-xl font-black">99.2</span><span className="text-[10px] font-bold text-white/30">%</span></div>
             </div>
             <div className="space-y-1.5">
-              <div className="flex items-center gap-2 text-amber-500"><Trophy size={14} /><span className="text-[10px] font-black uppercase">Hạng cao nhất </span></div>
-              <div className="flex items-baseline gap-1"><span className="text-xl font-black text-amber-400">02</span><span className="text-[10px] font-bold text-white/30">/168</span></div>
+              <div className="flex items-center gap-2 text-amber-500"><Trophy size={14} /><span className="text-[10px] font-black uppercase">Hạng cao </span></div>
+              <div className="flex items-baseline gap-1"><span className="text-xl font-black text-amber-400">02</span><span className="text-[10px] font-bold text-white/30">/TP</span></div>
             </div>
           </div>
-          <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-between relative z-10">
-             <div className="flex items-center gap-2.5">
-               <div className="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center shadow-lg shadow-red-600/30"><Zap size={14} fill="white" /></div>
-               <span className="text-[11px] font-bold text-white/80">Dẫn đầu chỉ số phục vụ</span>
-             </div>
-             <button onClick={() => setCurrentScreen(AppState.REPORT)} className="text-[10px] font-black uppercase text-red-500 hover:text-red-400 transition-colors flex items-center gap-1">Chi tiết <ChevronRight size={12} /></button>
-          </div>
         </div>
-      </div>
-      
-      <div className="px-6 mb-8 sm:px-10">
-        <button onClick={handleOpenZalo} className="w-full p-6 bg-[#0068FF] text-white rounded-[28px] flex items-center justify-between group shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all border border-blue-400/20">
-          <div className="flex items-center gap-5">
-            <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-inner"><MessageCircle size={22} className="text-[#0068FF] fill-current" /></div>
-            <div className="text-left"><h4 className="text-[15px] font-bold">Cần hỗ trợ trực tiếp?</h4><p className="text-[11px] text-white/70 font-medium mt-0.5">Chúng tôi trả lời ngay lập tức</p></div>
-          </div>
-          <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center group-hover:translate-x-1.5 transition-transform"><ArrowRight size={20} /></div>
-        </button>
       </div>
     </div>
   );
