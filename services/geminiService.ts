@@ -34,10 +34,11 @@ CẤU TRÚC PHẢN HỒI:
 export class GeminiService {
   private genAI: GoogleGenerativeAI;
 
-  constructor() {
-    // Sửa lỗi: Khởi tạo trực tiếp bằng API Key (chuỗi), không cần object bọc ngoài
-    this.genAI = new GoogleGenerativeAI(process.env.API_KEY || '');
-  }
+ constructor() {
+  this.genAI = new GoogleGenerativeAI(
+    import.meta.env.GEMINI_API_KEY || ''
+  );
+}
 
   async sendMessage(history: Message[], userInput: string) {
     try {
