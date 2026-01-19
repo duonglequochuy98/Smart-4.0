@@ -108,7 +108,7 @@ const App: React.FC = () => {
   const fabHasMoved = useRef(false);
 
   const ZALO_LINK = "https://zalo.me/1358120320651896785";
-  const LOGO_URL = "https://scontent.fsgn19-1.fna.fbcdn.net/v/t39.30808-6/280693020_3237820713132798_7388265251517760538_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=q4Cx62_fSMkQ7kNvwGjyuwc&_nc_oc=AdkASFGLOjZTjarfl1f4XU4FA1mdPkOLcGrxpEKEqkOAFY1Auk_jzez9YlAV0TH6P9Y&_nc_zt=23&_nc_ht=scontent.fsgn19-1.fna&_nc_gid=5uRvSM3PSD_G5xyOw3U-Tw&oh=00_AfpP-Kb2S8BZC0uNDLZXZqOlBVmwTLFszekM28EGupoP-w&oe=696A3C53";
+  const LOGO_URL = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRTmbQfoaEv8CFfButwh6ANX5mUVyu43HYsLg&s";
 
   const updateFabPos = () => {
     if (containerRef.current) {
