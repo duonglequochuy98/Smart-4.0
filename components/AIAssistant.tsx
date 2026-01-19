@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Message } from '../types';
 import { geminiService } from '../services/geminiService';
@@ -16,7 +17,9 @@ import {
   Zap, 
   CircuitBoard,
   Copy,
-  Check
+  Check,
+  Lightbulb,
+  Globe
 } from 'lucide-react';
 
 interface AIAssistantProps {
@@ -31,17 +34,25 @@ interface AvatarOption {
 }
 
 const AVATAR_OPTIONS: AvatarOption[] = [
-  { id: 'classic', icon: <Bot size={20} />, color: 'bg-red-500', name: 'Cổ điển' },
+  { id: 'classic', icon: <Bot size={20} />, color: 'bg-red-500', name: 'Smart Plus' },
   { id: 'friendly', icon: <Smile size={20} />, color: 'bg-emerald-500', name: 'Thân thiện' },
-  { id: 'smart', icon: <Cpu size={20} />, color: 'bg-blue-500', name: 'Thông minh' },
+  { id: 'smart', icon: <Cpu size={20} />, color: 'bg-blue-500', name: 'Chuyên gia' },
   { id: 'dynamic', icon: <Zap size={20} />, color: 'bg-amber-500', name: 'Năng động' },
-  { id: 'tech', icon: <CircuitBoard size={20} />, color: 'bg-indigo-500', name: 'Công nghệ' },
+  { id: 'tech', icon: <CircuitBoard size={20} />, color: 'bg-indigo-500', name: 'Kỹ thuật' },
   { id: 'ghost', icon: <Ghost size={20} />, color: 'bg-slate-700', name: 'Tối giản' },
+];
+
+const SUGGESTIONS = [
+  "Thủ tục làm Khai sinh?",
+  "How to register marriage?",
+  "Địa chỉ UBND Phường ở đâu?",
+  "Certified copies fees?",
+  "Làm sao để đặt lịch hẹn?"
 ];
 
 export const AIAssistant: React.FC<AIAssistantProps> = ({ onBack }) => {
   const [messages, setMessages] = useState<Message[]>([
-    { role: 'model', text: 'Xin chào! Tôi là trợ lý AI của Phường Tây Thạnh. Tôi có thể giúp gì cho bạn về thủ tục hành chính hôm nay?' }
+    { role: 'model', text: 'Kính thưa ông/bà, tôi là Trợ lý AI Smart 4.0 Plus. Tôi hỗ trợ song ngữ Tiếng Việt & English. Ông/bà cần hỗ trợ thủ tục gì ạ? | Dear Citizen, I support both Vietnamese & English. How can I help you today?' }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -56,19 +67,20 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ onBack }) => {
     }
   }, [messages, isLoading]);
 
-  const handleSend = async () => {
-    if (!input.trim() || isLoading) return;
+  const handleSend = async (customInput?: string) => {
+    const textToSend = customInput || input;
+    if (!textToSend.trim() || isLoading) return;
 
-    const userMsg: Message = { role: 'user', text: input };
+    const userMsg: Message = { role: 'user', text: textToSend };
     setMessages(prev => [...prev, userMsg]);
-    setInput('');
+    if (!customInput) setInput('');
     setIsLoading(true);
 
     try {
-      const reply = await geminiService.sendMessage(messages, input);
+      const reply = await geminiService.sendMessage(messages, textToSend);
       setMessages(prev => [...prev, { role: 'model', text: reply || 'Xin lỗi, tôi gặp sự cố khi xử lý yêu cầu.' }]);
     } catch (error) {
-      setMessages(prev => [...prev, { role: 'model', text: 'Hệ thống đang bận, vui lòng thử lại sau.' }]);
+      setMessages(prev => [...prev, { role: 'model', text: 'Hệ thống đang bận để cập nhật dữ liệu mới, kính mong ông/bà thử lại sau ít phút.' }]);
     } finally {
       setIsLoading(false);
     }
@@ -105,32 +117,27 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ onBack }) => {
               <div className={selectedAvatar.color + " p-1 rounded-lg text-white"}>
                 {selectedAvatar.icon}
               </div>
-              <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-0.5 border border-red-600">
-                <Settings size={8} className="text-red-600" />
-              </div>
             </button>
             <div>
               <h3 className="font-bold text-sm">Trợ lý {selectedAvatar.name}</h3>
               <div className="flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span>
-                <p className="text-[10px] text-white/80 font-medium">Đang trực tuyến</p>
+                <p className="text-[10px] text-white/80 font-bold uppercase tracking-tighter">Bilingual AI v4.0+</p>
               </div>
             </div>
           </div>
         </div>
-        <button 
-          onClick={() => setShowAvatarPicker(true)}
-          className="text-[10px] font-black uppercase bg-white/10 px-3 py-1.5 rounded-full hover:bg-white/20 transition-colors"
-        >
-          Đổi Avatar
-        </button>
+        <div className="flex items-center gap-2">
+          <Globe size={16} className="text-white/60" />
+          <span className="text-[10px] font-black uppercase tracking-widest">VN | EN</span>
+        </div>
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50" ref={scrollRef}>
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50 no-scrollbar" ref={scrollRef}>
         {messages.map((m, i) => (
           <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-2 duration-300`}>
-            <div className={`max-w-[88%] flex gap-2.5 ${m.role === 'user' ? 'flex-row-reverse' : ''}`}>
+            <div className={`max-w-[92%] flex gap-2.5 ${m.role === 'user' ? 'flex-row-reverse' : ''}`}>
               <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 shadow-sm mt-1 transition-all ${
                 m.role === 'user' ? 'bg-red-500 text-white' : `${selectedAvatar.color} text-white`
               }`}>
@@ -148,7 +155,6 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ onBack }) => {
                   <button 
                     onClick={() => handleCopy(m.text, i)}
                     className="absolute top-2 right-2 p-1.5 rounded-lg bg-slate-50 text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
-                    title="Sao chép nội dung"
                   >
                     {copiedIndex === i ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
                   </button>
@@ -163,22 +169,17 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ onBack }) => {
               <div className={`w-8 h-8 rounded-lg ${selectedAvatar.color} text-white flex items-center justify-center shadow-sm mt-1 animate-bounce`}>
                 <Sparkles size={16} />
               </div>
-              <div className="bg-white border border-red-50 px-4 py-3 rounded-[20px] rounded-tl-none shadow-md flex flex-col gap-2 min-w-[140px] relative overflow-hidden">
+              <div className="bg-white border border-red-50 px-4 py-3 rounded-[20px] rounded-tl-none shadow-md flex flex-col gap-2 min-w-[160px] relative overflow-hidden">
                 <div className="flex items-center gap-2">
                   <div className="flex gap-1">
                     <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-bounce [animation-duration:0.6s]"></span>
                     <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-bounce [animation-duration:0.6s] [animation-delay:0.2s]"></span>
                     <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-bounce [animation-duration:0.6s] [animation-delay:0.4s]"></span>
                   </div>
-                  <span className="text-[11px] font-black text-red-600 uppercase tracking-widest flex items-center">
-                    AI đang soạn thảo
-                    <span className="inline-flex w-4 ml-0.5">
-                      <span className="animate-[ellipsis_1.5s_infinite]">...</span>
-                    </span>
-                  </span>
+                  <span className="text-[10px] font-black text-red-600 uppercase tracking-widest">AI is thinking...</span>
                 </div>
-                <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-red-400 to-red-600 w-1/3 rounded-full animate-[loading-slide_1s_infinite_ease-in-out]"></div>
+                <div className="h-1 w-full bg-slate-100 rounded-full overflow-hidden">
+                  <div className="h-full bg-red-600 w-1/3 rounded-full animate-[loading-slide_1.5s_infinite_ease-in-out]"></div>
                 </div>
               </div>
             </div>
@@ -186,19 +187,34 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ onBack }) => {
         )}
       </div>
 
-      {/* Input */}
-      <div className="p-4 border-t bg-white">
-        <div className="flex gap-2 bg-slate-100 p-1.5 rounded-[24px] items-center border border-slate-200/50">
+      {/* Suggestions & Input */}
+      <div className="p-4 border-t bg-white space-y-3">
+        {messages.length < 4 && !isLoading && (
+          <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+            {SUGGESTIONS.map((s, idx) => (
+              <button 
+                key={idx}
+                onClick={() => handleSend(s)}
+                className="flex items-center gap-1.5 px-4 py-2 bg-slate-50 border border-slate-100 rounded-full whitespace-nowrap text-[11px] font-bold text-slate-600 hover:bg-red-50 hover:text-red-600 hover:border-red-100 transition-all active:scale-95"
+              >
+                <Lightbulb size={12} className="text-amber-500" />
+                {s}
+              </button>
+            ))}
+          </div>
+        )}
+        
+        <div className="flex gap-2 bg-slate-100 p-1.5 rounded-[24px] items-center border border-slate-200/50 focus-within:ring-2 focus-within:ring-red-500/20 focus-within:bg-white transition-all">
           <input 
             type="text" 
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-            placeholder="Bạn cần hỗ trợ thủ tục gì?..." 
-            className="flex-1 bg-transparent px-4 py-2.5 text-sm focus:outline-none text-slate-700 placeholder:text-slate-400 font-medium"
+            placeholder="Type your question here / Nhập câu hỏi..." 
+            className="flex-1 bg-transparent px-4 py-2.5 text-sm focus:outline-none text-slate-700 placeholder:text-slate-400 font-bold"
           />
           <button 
-            onClick={handleSend}
+            onClick={() => handleSend()}
             disabled={isLoading || !input.trim()}
             className="w-10 h-10 bg-red-600 text-white rounded-full flex items-center justify-center hover:bg-red-700 transition-all disabled:opacity-40 shadow-md shadow-red-600/20 active:scale-90"
           >
@@ -213,7 +229,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ onBack }) => {
           <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setShowAvatarPicker(false)}></div>
           <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-[32px] p-6 shadow-2xl animate-in slide-in-from-bottom duration-500">
             <div className="flex items-center justify-between mb-6">
-              <h4 className="text-lg font-black text-slate-900 tracking-tight">Tùy chọn Trợ lý AI</h4>
+              <h4 className="text-lg font-black text-slate-900 tracking-tight">AI Personalization</h4>
               <button onClick={() => setShowAvatarPicker(false)} className="w-10 h-10 flex items-center justify-center bg-slate-100 rounded-full text-slate-500">
                 <X size={20} />
               </button>
@@ -243,12 +259,17 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ onBack }) => {
                 </button>
               ))}
             </div>
-            <div className="mt-8">
+            <div className="mt-8 space-y-4">
+              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                 <p className="text-[11px] font-bold text-slate-500 leading-relaxed italic">
+                   "All responses follow current public administration procedures in Tay Thanh Ward."
+                 </p>
+              </div>
               <button 
                 onClick={() => setShowAvatarPicker(false)}
-                className="w-full h-14 bg-red-600 text-white rounded-2xl font-bold text-sm shadow-xl shadow-red-600/20 active:scale-[0.98] transition-all"
+                className="w-full h-14 bg-red-600 text-white rounded-2xl font-bold text-sm shadow-xl shadow-red-600/20 active:scale-[0.98] transition-all uppercase tracking-widest"
               >
-                Xác nhận thay đổi
+                Confirm / Xác nhận
               </button>
             </div>
           </div>
@@ -260,14 +281,9 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ onBack }) => {
           0% { transform: translateX(-100%); }
           100% { transform: translateX(300%); }
         }
-        @keyframes ellipsis {
-          0% { content: '.'; opacity: 0.3; }
-          33% { content: '..'; opacity: 0.6; }
-          66% { content: '...'; opacity: 1; }
-          100% { content: '.'; opacity: 0.3; }
-        }
+        .no-scrollbar::-webkit-scrollbar { display: none !important; }
+        .no-scrollbar { -ms-overflow-style: none !important; scrollbar-width: none !important; }
       `}</style>
     </div>
   );
 };
-
