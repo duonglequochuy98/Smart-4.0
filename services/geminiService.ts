@@ -35,32 +35,39 @@ export class GeminiService {
   private genAI: GoogleGenerativeAI;
 
   constructor() {
-    // Khởi tạo đúng cú pháp với named parameter từ process.env.API_KEY
-    this.ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+    // Sửa lỗi: Khởi tạo trực tiếp bằng API Key (chuỗi), không cần object bọc ngoài
+    this.genAI = new GoogleGenerativeAI(process.env.API_KEY || '');
   }
 
   async sendMessage(history: Message[], userInput: string) {
     try {
-      // Sử dụng ai.models.generateContent theo hướng dẫn mới nhất
-      const response = await this.ai.models.generateContent({
-        model: "gemini-1.5-flash",
-        contents: {
-          parts: [
-            ...history.map(m => ({
-              text: `${m.role === 'model' ? 'AI Assistant:' : 'User:'} ${m.text}`
-            })),
-            { text: userInput }
-          ]
-        },
-        config: {
-          systemInstruction: SYSTEM_INSTRUCTION,
+      // Sửa lỗi: System Instruction phải nằm trong getGenerativeModel
+      const model = this.genAI.getGenerativeModel({
+        model: "gemini-1.5-flash", // Lưu ý: gemini-3-flash chưa ra mắt bản ổn định, dùng 1.5-flash để chạy tốt nhất
+        systemInstruction: SYSTEM_INSTRUCTION,
+      });
+
+      // Sửa lỗi: Format lại history theo đúng chuẩn role 'user' và 'model'
+      const chatHistory = history.map(m => ({
+        role: m.role === 'model' ? 'model' : 'user',
+        parts: [{ text: m.text }],
+      }));
+
+      // Sử dụng startChat để duy trì hội thoại chuyên nghiệp hơn
+      const chat = model.startChat({
+        history: chatHistory,
+        generationConfig: {
           temperature: 0.3,
           topP: 0.8,
         },
       });
 
-      // Truy cập trực tiếp thuộc tính .text (không phải phương thức .text())
-      return response.text;
+      const result = await chat.sendMessage(userInput);
+      const response = await result.response;
+
+      // Sửa lỗi: Sử dụng phương thức .text() để lấy nội dung phản hồi
+      return response.text();
+
     } catch (error) {
       console.error("Gemini API Error:", error);
       throw error;
