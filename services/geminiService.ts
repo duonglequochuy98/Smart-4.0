@@ -1,4 +1,5 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+
+import { GoogleGenAI } from "@google/genai";
 import { Message } from "../types";
 
 const SYSTEM_INSTRUCTION = `BẠN LÀ "TRỢ LÝ AI SMART 4.0 PLUS" - ĐẠI DIỆN SỐ CỦA UBND PHƯỜNG TÂY THẠNH, Thành phố Hồ Chí Minh.
@@ -33,45 +34,32 @@ CẤU TRÚC PHẢN HỒI:
 - Sử dụng các tiêu đề rõ ràng như "Vai trò", "Thẩm quyền bổ nhiệm", "Bối cảnh thay đổi".`;
 
 export class GeminiService {
-  private genAI: GoogleGenerativeAI;
+  private ai: any;
 
   constructor() {
-    // Đảm bảo bạn đã cài đặt: npm install @google/generative-ai
-    const apiKey = process.env.API_KEY || "";
-    this.genAI = new GoogleGenerativeAI(apiKey);
+    this.ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   }
 
   async sendMessage(history: Message[], userInput: string) {
     try {
-      // Khởi tạo model với System Instruction ngay từ đầu
-      const model = this.genAI.getGenerativeModel({
-        model: "gemini-1.5-flash", // Sử dụng bản ổn định hoặc "gemini-2.0-flash-exp"
-        systemInstruction: SYSTEM_INSTRUCTION,
+      const response = await this.ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: [
+          ...history.map(m => ({
+            role: m.role,
+            parts: [{ text: m.text }]
+          })),
+          { role: 'user', parts: [{ text: userInput }] }
+        ],
+        config: {
+          systemInstruction: SYSTEM_INSTRUCTION,
+          temperature: 0.3,
+          topP: 0.8,
+          maxOutputTokens: 2048,
+        },
       });
 
-      // Thiết lập cấu hình phản hồi
-      const generationConfig = {
-        temperature: 0.3,
-        topP: 0.8,
-        maxOutputTokens: 2048,
-      };
-
-      // Chuyển đổi lịch sử chat sang định dạng của Google SDK
-      const chatHistory = history.map(m => ({
-        role: m.role === 'assistant' ? 'model' : 'user',
-        parts: [{ text: m.text }],
-      }));
-
-      // Khởi tạo phiên chat để AI nhớ ngữ cảnh cũ
-      const chatSession = model.startChat({
-        history: chatHistory,
-        generationConfig,
-      });
-
-      const result = await chatSession.sendMessage(userInput);
-      const response = await result.response;
-      
-      return response.text();
+      return response.text;
     } catch (error) {
       console.error("Gemini API Error:", error);
       throw error;

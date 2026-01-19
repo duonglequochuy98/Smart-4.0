@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ArrowLeft, User, Lock, Chrome } from 'lucide-react';
 
@@ -8,6 +9,7 @@ interface LoginViewProps {
 export const LoginView: React.FC<LoginViewProps> = ({ onBack }) => {
   return (
     <div className="flex flex-col h-full bg-white animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-y-auto">
+      {/* Header */}
       <div className="p-3 flex items-center">
         <button 
           onClick={onBack} 

@@ -1,3 +1,5 @@
+
+
 import React from 'react';
 
 interface FeatureCardProps {
@@ -9,16 +11,17 @@ interface FeatureCardProps {
 
 export const FeatureCard: React.FC<FeatureCardProps> = ({ icon, label, color, onClick }) => {
   return (
-    <button
+    <button 
       onClick={onClick}
-      className="flex flex-col items-center gap-2 p-3 rounded-2xl hover:scale-105 active:scale-95 transition-all"
+      className="flex flex-col items-center group transition-all duration-300 transform active:scale-95 w-full"
     >
-      <div className={`w-12 h-12 ${color} rounded-xl flex items-center justify-center`}>
-        {React.cloneElement(icon as React.ReactElement, { size: 24 })}
+      <div className="w-full aspect-square rounded-[20px] flex items-center justify-center border border-slate-100 bg-white shadow-sm transition-all group-hover:border-red-200 group-hover:shadow-md">
+        <div className={`w-11 h-11 rounded-full flex items-center justify-center ${color} shadow-inner`}>
+          {/* Use React.isValidElement and cast to React.ReactElement<any> to resolve TypeScript error for 'size' prop */}
+          {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement<any>, { size: 22 }) : icon}
+        </div>
       </div>
-      <span className="text-[10px] font-bold text-slate-700 text-center leading-tight">
-        {label}
-      </span>
+      <span className="mt-2 text-[11px] font-bold text-slate-600 text-center leading-tight">{label}</span>
     </button>
   );
 };
