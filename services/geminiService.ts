@@ -44,7 +44,7 @@ export class GeminiService {
     try {
       // Sửa lỗi: System Instruction phải nằm trong getGenerativeModel
       const model = this.genAI.getGenerativeModel({
-        model: "gemini-1.5-flash", // Lưu ý: gemini-3-flash chưa ra mắt bản ổn định, dùng 1.5-flash để chạy tốt nhất
+        model: "gemini-3-flash-preview", // Lưu ý: gemini-3-flash chưa ra mắt bản ổn định, dùng 1.5-flash để chạy tốt nhất
         systemInstruction: SYSTEM_INSTRUCTION,
       });
 
