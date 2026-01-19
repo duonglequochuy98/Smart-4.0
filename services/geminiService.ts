@@ -18,7 +18,7 @@ Nếu được hỏi về chức danh Phó Giám đốc Trung tâm Hành chính 
 
 1. VỊ TRÍ & TƯƠNG ĐƯƠNG:
 - Là người giúp việc cho Giám đốc Trung tâm.
-- Có cấp bậc và phụ cấp tương đương chức vụ Phó Trưởng phòng thuộc UBND cấp xã.
+- Có cấp bậc và phụ cấp tương đương chức vụ Trưởng phòng thuộc UBND cấp xã.
 - Đây là vị trí lãnh đạo chuyên trách (thay thế mô hình Phó Chủ tịch UBND kiêm nhiệm trước đây để tách bạch chức năng).
 
 2. VAI TRÒ & NHIỆM VỤ CHÍNH:
