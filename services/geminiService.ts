@@ -1,97 +1,70 @@
+
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { Message } from '../types';
+import { Message } from "../types";
 
-// Đọc API key từ Vercel Environment Variables
-const API_KEY = process.env.GEMINI_API_KEY || import.meta.env.VITE_GEMINI_API_KEY || '';
+const SYSTEM_INSTRUCTION = `BẠN LÀ "TRỢ LÝ AI SMART 4.0 PLUS" - ĐẠI DIỆN SỐ CỦA UBND PHƯỜNG TÂY THẠNH, Thành phố Hồ Chí Minh.
 
-if (!API_KEY) {
-  console.warn('⚠️ GEMINI_API_KEY not found in environment variables');
-}
+NGÔN NGỮ: 
+- Bạn hỗ trợ song ngữ: Tiếng Việt (chính) và Tiếng Anh (English).
+- Tự động nhận diện ngôn ngữ người dùng để phản hồi tương ứng.
 
-const genAI = new GoogleGenerativeAI(API_KEY);
+QUY TẮC CỐT LÕI:
+1. ĐỊA CHỈ: 200/12 Nguyễn Hữu Tiến, Phường Tây Thạnh, Thành phố Hồ Chí Minh.
+2. HOTLINE hỗ trợ: (028) 3815 3161.
+3. TUYỆT ĐỐI KHÔNG nhắc đến "Quận Tân Phú".
 
-export const geminiService = {
-  async sendMessage(messages: Message[], userInput: string): Promise<string> {
-    // Nếu không có API key, dùng fallback
-    if (!API_KEY || API_KEY.length < 10) {
-      return fallbackResponse(userInput);
-    }
+KIẾN THỨC TỔ CHỨC BỘ MÁY (QUAN TRỌNG):
+Nếu được hỏi về chức danh Phó Giám đốc Trung tâm Hành chính công cấp xã/phường, hãy cung cấp thông tin dựa trên quy định mới nhất:
 
+1. VỊ TRÍ & TƯƠNG ĐƯƠNG:
+- Là người giúp việc cho Giám đốc Trung tâm.
+- Có cấp bậc và phụ cấp tương đương chức vụ Phó Trưởng phòng thuộc UBND cấp xã.
+- Đây là vị trí lãnh đạo chuyên trách (thay thế mô hình Phó Chủ tịch UBND kiêm nhiệm trước đây để tách bạch chức năng).
+
+2. VAI TRÒ & NHIỆM VỤ CHÍNH:
+- Hỗ trợ Giám đốc: Giúp Giám đốc chỉ đạo, phụ trách một số lĩnh vực công tác cụ thể; trực tiếp kiểm tra, đôn đốc công chức làm việc tại Trung tâm.
+- Trách nhiệm: Chịu trách nhiệm trước Giám đốc và trước pháp luật về các nhiệm vụ được phân công.
+- Điều hành: Được ủy quyền điều hành toàn bộ hoạt động của Trung tâm khi Giám đốc vắng mặt.
+
+3. THẨM QUYỀN BỔ NHIỆM:
+- Chủ tịch UBND Phường là người ra quyết định bổ nhiệm, miễn nhiệm Phó Giám đốc Trung tâm.
+
+CẤU TRÚC PHẢN HỒI:
+- Khi trả lời về vấn đề này, hãy dùng thái độ trang trọng, chuyên nghiệp. 
+- Sử dụng các tiêu đề rõ ràng như "Vai trò", "Thẩm quyền bổ nhiệm", "Bối cảnh thay đổi".`;
+
+export class GeminiService {
+  private ai: any;
+
+  constructor() {
+    this.ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  }
+
+  async sendMessage(history: Message[], userInput: string) {
     try {
-      const model = genAI.getGenerativeModel({ 
-        model: "gemini-1.5-flash",
-        generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 500,
-        }
+      const response = await this.ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: [
+          ...history.map(m => ({
+            role: m.role,
+            parts: [{ text: m.text }]
+          })),
+          { role: 'user', parts: [{ text: userInput }] }
+        ],
+        config: {
+          systemInstruction: SYSTEM_INSTRUCTION,
+          temperature: 0.3,
+          topP: 0.8,
+          maxOutputTokens: 2048,
+        },
       });
 
-      const systemPrompt = `Bạn là Trợ lý AI Smart 4.0 Plus của UBND Phường Tây Thạnh, Quận Tân Phú, TP.HCM.
-
-📍 THÔNG TIN LIÊN HỆ:
-- Địa chỉ: 206 Tân Kỳ Tân Quý, Phường Tây Thạnh, Quận Tân Phú, TP.HCM
-- Điện thoại: (028) 3816 3264
-- Email: phuongtaythanh@tanphu.hochiminhcity.gov.vn
-- Giờ làm việc: 7h00-11h30 & 13h00-17h00 (Thứ 2-6)
-
-📋 THỦ TỤC HÀNH CHÍNH:
-1. Chứng thực bản sao: 2.000đ/trang, 15 phút
-2. Đăng ký khai sinh: Miễn phí, 2 ngày
-3. Đăng ký kết hôn: 50.000đ, 3 ngày
-4. Đăng ký thường trú: Miễn phí, 5 ngày
-5. Cấp sổ hộ khẩu: 10.000đ, 3 ngày
-
-YÊU CẦU:
-- Trả lời ngắn gọn (2-4 câu)
-- Sử dụng emoji: 📍🕐💰✅
-- Kết thúc: "Bạn cần hỗ trợ thêm gì không ạ?"
-
-CÂU HỎI: ${userInput}`;
-
-      const result = await model.generateContent(systemPrompt);
-      const response = await result.response;
-      const text = response.text();
-
-      if (!text || text.trim().length === 0) {
-        throw new Error('Empty response');
-      }
-
-      return text;
-
-    } catch (error: any) {
-      console.error('❌ Gemini API Error:', error.message);
-      return fallbackResponse(userInput);
+      return response.text;
+    } catch (error) {
+      console.error("Gemini API Error:", error);
+      throw error;
     }
   }
-};
-
-// Fallback responses khi API lỗi
-function fallbackResponse(userInput: string): string {
-  const input = userInput.toLowerCase().trim();
-
-  if (input.includes('khai sinh')) {
-    return '👶 **Đăng ký Khai sinh:**\n\n💰 Phí: Miễn phí\n⏱️ Thời gian: 2 ngày\n\n📋 Cần: Giấy khai sinh từ BV, CCCD bố mẹ, Giấy kết hôn\n\n📍 Nộp tại: 206 Tân Kỳ Tân Quý\n\nBạn cần hỗ trợ thêm gì không ạ?';
-  }
-
-  if (input.includes('chứng thực')) {
-    return '📄 **Chứng thực bản sao:**\n\n💰 Phí: 2.000đ/trang\n⏱️ Thời gian: 15 phút\n\n📋 Cần: CCCD + Bản gốc\n\n✅ Làm ngay không cần hẹn\n\nBạn cần hỗ trợ thêm gì không ạ?';
-  }
-
-  if (input.includes('địa chỉ') || input.includes('ở đâu')) {
-    return '📍 **Địa chỉ:**\n206 Tân Kỳ Tân Quý, P.Tây Thạnh, Q.Tân Phú\n\n📞 Hotline: (028) 3816 3264\n\n🕐 Giờ làm việc: 7h-11h30 & 13h-17h (T2-T6)\n\nBạn cần hỗ trợ thêm gì không ạ?';
-  }
-
-  if (input.includes('giờ') || input.includes('làm việc')) {
-    return '🕐 **Giờ làm việc:**\n• Sáng: 7h00-11h30\n• Chiều: 13h00-17h00\n• Thứ 2-6 (trừ lễ)\n\n✅ Bộ phận một cửa tiếp cả ngày\n\nBạn cần hỗ trợ thêm gì không ạ?';
-  }
-
-  if (input.includes('kết hôn')) {
-    return '💑 **Đăng ký Kết hôn:**\n\n💰 Phí: 50.000đ\n⏱️ Thời gian: 3 ngày\n\n📋 Cần: CCCD 2 bên, Xác nhận hôn nhân, 4 ảnh 4x6\n\n✅ Cả hai phải có mặt\n\nBạn cần hỗ trợ thêm gì không ạ?';
-  }
-
-  if (input.includes('thường trú') || input.includes('hộ khẩu')) {
-    return '🏠 **Đăng ký Thường trú:**\n\n💰 Phí: Miễn phí\n⏱️ Thời gian: 5 ngày\n\n📋 Cần: Sổ HK cũ, CCCD, Hợp đồng thuê/Sổ đỏ\n\n📍 Nộp tại Bộ phận một cửa\n\nBạn cần hỗ trợ thêm gì không ạ?';
-  }
-
-  return 'Xin chào! Tôi là Trợ lý AI Phường Tây Thạnh 👋\n\nTôi có thể hỗ trợ:\n✅ Thông tin địa chỉ, giờ làm việc\n✅ Hướng dẫn thủ tục hành chính\n✅ Đặt lịch hẹn, tra cứu hồ sơ\n\nBạn cần hỗ trợ gì ạ? 😊';
 }
+
+export const geminiService = new GeminiService();
