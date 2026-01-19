@@ -32,7 +32,7 @@ CẤU TRÚC PHẢN HỒI:
 - Sử dụng các tiêu đề rõ ràng như "Vai trò", "Thẩm quyền bổ nhiệm", "Bối cảnh thay đổi".`;
 
 export class GeminiService {
-  private ai: GoogleGenAI;
+  private genAI: GoogleGenerativeAI;
 
   constructor() {
     // Khởi tạo đúng cú pháp với named parameter từ process.env.API_KEY
@@ -43,7 +43,7 @@ export class GeminiService {
     try {
       // Sử dụng ai.models.generateContent theo hướng dẫn mới nhất
       const response = await this.ai.models.generateContent({
-        model: "gemini-3-flash-preview",
+        model: "gemini-1.5-flash",
         contents: {
           parts: [
             ...history.map(m => ({
