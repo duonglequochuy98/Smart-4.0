@@ -9,6 +9,7 @@ export enum AppState {
   LANDING = 'LANDING',
   TRACKING = 'TRACKING',
   SUBMIT = 'SUBMIT',
+  BOOKING = 'BOOKING',
   LOGIN = 'LOGIN',
   CHAT = 'CHAT',
   REPORT = 'REPORT',

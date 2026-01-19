@@ -4,6 +4,7 @@ import { AppState } from './types';
 import { FeatureCard } from './components/FeatureCard';
 import { TrackingView } from './components/TrackingView';
 import { SubmissionView } from './components/SubmissionView';
+import { BookingView } from './components/BookingView';
 import { AIAssistant } from './components/AIAssistant';
 import { ReportView } from './components/ReportView';
 import { NotificationView } from './components/NotificationView';
@@ -27,11 +28,56 @@ import {
   CalendarDays,
   Sparkles,
   ShieldCheck,
-  Trophy
+  Trophy,
+  CalendarCheck
 } from 'lucide-react';
+
+export interface NewsItem {
+  id: number;
+  title: string;
+  summary: string;
+  date: string;
+  category: 'Thông báo' | 'Tin tức' | 'Sự kiện';
+  isRead: boolean;
+  isImportant?: boolean;
+  url?: string;
+  isBooking?: boolean;
+  bookingData?: {
+    name: string;
+    code: string;
+    service: string;
+    time: string;
+    date: string;
+    counter: string;
+  };
+}
+
+const INITIAL_NEWS: NewsItem[] = [
+  {
+    id: 1,
+    title: "Thông báo về việc nghỉ lễ Tết dương lịch 01/01/2026",
+    summary: "UBND Phường Tây Thạnh thông báo lịch nghỉ lễ và trực giải quyết hồ sơ cấp bách trong dịp lễ Quốc khánh.",
+    date: "10:30 - 25/08/2024",
+    category: "Thông báo",
+    url: 'https://thuvienphapluat.vn/chinh-sach-phap-luat-moi/vn/ho-tro-phap-luat/tu-van-phap-luat/92028/lich-nghi-le-quoc-khanh-2-9-2025-nguoi-lao-dong-duoc-nghi-le-4-ngay-hay-3-ngay',
+    isRead: false,
+    isImportant: true
+  },
+  {
+    id: 3,
+    title: "Hướng dẫn nộp hồ sơ trực tuyến qua Cổng dịch vụ công mới",
+    summary: "Các bước đơn giản để nộp hồ sơ chứng thực bản sao và đăng ký khai sinh ngay tại nhà.",
+    date: "05:00 - 05/01/2025",
+    category: "Tin tức",
+    url: 'https://www.youtube.com/watch?v=HSmgjZ4Q6dM',
+    isRead: true,
+    isImportant: true
+  }
+];
 
 const App: React.FC = () => {
   const [currentScreen, setCurrentScreen] = useState<AppState>(AppState.WELCOME);
+  const [notifications, setNotifications] = useState<NewsItem[]>(INITIAL_NEWS);
   const containerRef = useRef<HTMLDivElement>(null);
   
   const [todayDate, setTodayDate] = useState(() => {
@@ -41,6 +87,10 @@ const App: React.FC = () => {
     const y = now.getFullYear();
     return `${d}/${m}/${y}`;
   });
+
+  const addNotification = (news: NewsItem) => {
+    setNotifications(prev => [news, ...prev]);
+  };
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -58,7 +108,6 @@ const App: React.FC = () => {
   const fabHasMoved = useRef(false);
 
   const ZALO_LINK = "https://zalo.me/1358120320651896785";
-  // Logo mới được cung cấp
   const LOGO_URL = "https://scontent.fsgn19-1.fna.fbcdn.net/v/t39.30808-6/280693020_3237820713132798_7388265251517760538_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=q4Cx62_fSMkQ7kNvwGjyuwc&_nc_oc=AdkASFGLOjZTjarfl1f4XU4FA1mdPkOLcGrxpEKEqkOAFY1Auk_jzez9YlAV0TH6P9Y&_nc_zt=23&_nc_ht=scontent.fsgn19-1.fna&_nc_gid=5uRvSM3PSD_G5xyOw3U-Tw&oh=00_AfpP-Kb2S8BZC0uNDLZXZqOlBVmwTLFszekM28EGupoP-w&oe=696A3C53";
 
   const updateFabPos = () => {
@@ -74,7 +123,6 @@ const App: React.FC = () => {
   useEffect(() => {
     updateFabPos();
     window.addEventListener('resize', updateFabPos);
-    // Fixed: Corrected the typo 'removeResizeListener' to 'removeEventListener' on line 77
     return () => window.removeEventListener('resize', updateFabPos);
   }, []);
 
@@ -113,6 +161,7 @@ const App: React.FC = () => {
 
   const renderBottomNav = () => {
     if ([AppState.WELCOME, AppState.CHAT].includes(currentScreen)) return null;
+    const unreadCount = notifications.filter(n => !n.isRead).length;
     return (
       <div className="absolute bottom-0 left-0 right-0 h-20 bg-white/95 backdrop-blur-xl border-t border-slate-100 px-6 sm:px-12 flex items-center justify-between z-40 shadow-[0_-4px_25px_rgba(0,0,0,0.04)]">
         <button onClick={() => setCurrentScreen(AppState.LANDING)} className={`flex flex-col items-center gap-1.5 transition-all ${currentScreen === AppState.LANDING ? 'text-red-600 scale-110' : 'text-slate-400 hover:text-slate-600'}`}>
@@ -123,8 +172,13 @@ const App: React.FC = () => {
           <BarChart3 size={22} className={currentScreen === AppState.REPORT ? 'fill-red-50' : ''} />
           <span className="text-[10px] font-bold uppercase tracking-wider">Chỉ số</span>
         </button>
-        <button onClick={() => setCurrentScreen(AppState.NOTIFICATIONS)} className={`flex flex-col items-center gap-1.5 transition-all ${currentScreen === AppState.NOTIFICATIONS ? 'text-red-600 scale-110' : 'text-slate-400 hover:text-slate-600'}`}>
+        <button onClick={() => setCurrentScreen(AppState.NOTIFICATIONS)} className={`flex flex-col items-center gap-1.5 transition-all relative ${currentScreen === AppState.NOTIFICATIONS ? 'text-red-600 scale-110' : 'text-slate-400 hover:text-slate-600'}`}>
           <Bell size={22} className={currentScreen === AppState.NOTIFICATIONS ? 'fill-red-50' : ''} />
+          {unreadCount > 0 && (
+            <span className="absolute top-0 -right-1.5 w-4 h-4 bg-red-600 text-white text-[9px] font-black rounded-full flex items-center justify-center border-2 border-white shadow-sm">
+              {unreadCount}
+            </span>
+          )}
           <span className="text-[10px] font-bold uppercase tracking-wider">Thông báo</span>
         </button>
       </div>
@@ -197,17 +251,18 @@ const App: React.FC = () => {
           <img src={LOGO_URL} alt="Logo Main" className="w-full h-full object-cover" />
         </div>
         <div className="text-center space-y-2 mb-10">
-         <h1 className="text-xl sm:text-2xl font-black text-red-700 leading-[1.3] tracking-tight w-full max-w-[420px] mx-auto">
+           <h1 className="text-xl sm:text-2xl font-black text-red-700 leading-[1.3] tracking-tight w-full max-w-[420px] mx-auto">
             <span className="block whitespace-nowrap">Trung tâm Phục vụ Hành chính công</span>
-            <span className="block mt-1">Phường Tây Thạnh</span>
+            <span className="text-red-600 font-bold text-xl sm:text-2xl whitespace-nowrap">Phường Tây Thạnh</span>
           </h1>
           <div className="inline-block px-4 py-1.5 bg-slate-100 rounded-full">
             <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.25em]">Ứng dụng công nghệ 4.0</p>
           </div>
         </div>
         
-        <div className="w-full grid grid-cols-4 gap-3 sm:gap-5 mb-10 px-2 sm:px-6">
+        <div className="w-full grid grid-cols-5 gap-2 sm:gap-4 mb-10 px-2 sm:px-4">
           <FeatureCard onClick={() => setCurrentScreen(AppState.CHAT)} icon={<Bot />} label="Trợ lý AI" color="bg-red-50 text-red-600" />
+          <FeatureCard onClick={() => setCurrentScreen(AppState.BOOKING)} icon={<CalendarCheck />} label="Đặt lịch" color="bg-violet-50 text-violet-600" />
           <FeatureCard onClick={() => setCurrentScreen(AppState.TRACKING)} icon={<Search />} label="Tra cứu" color="bg-emerald-50 text-emerald-600" />
           <FeatureCard onClick={() => setCurrentScreen(AppState.SUBMIT)} icon={<FileUp />} label="Nộp hồ sơ" color="bg-orange-50 text-orange-600" />
           <FeatureCard onClick={handleOpenZalo} icon={<MessageCircle />} label="Zalo OA" color="bg-blue-50 text-blue-600" />
@@ -271,8 +326,9 @@ const App: React.FC = () => {
           {currentScreen === AppState.LANDING && renderLanding()}
           {currentScreen === AppState.TRACKING && <TrackingView onBack={() => setCurrentScreen(AppState.LANDING)} />}
           {currentScreen === AppState.SUBMIT && <SubmissionView onBack={() => setCurrentScreen(AppState.LANDING)} />}
+          {currentScreen === AppState.BOOKING && <BookingView onBack={() => setCurrentScreen(AppState.LANDING)} onAddNotification={addNotification} />}
           {currentScreen === AppState.REPORT && <ReportView onBack={() => setCurrentScreen(AppState.LANDING)} onOpenChat={() => setCurrentScreen(AppState.CHAT)} />}
-          {currentScreen === AppState.NOTIFICATIONS && <NotificationView onBack={() => setCurrentScreen(AppState.LANDING)} />}
+          {currentScreen === AppState.NOTIFICATIONS && <NotificationView onBack={() => setCurrentScreen(AppState.LANDING)} notifications={notifications} setNotifications={setNotifications} />}
           {currentScreen === AppState.LOGIN && <LoginView onBack={() => setCurrentScreen(AppState.WELCOME)} />}
           {currentScreen === AppState.CHAT && <AIAssistant onBack={() => setCurrentScreen(AppState.LANDING)} />}
           

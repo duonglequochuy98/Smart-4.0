@@ -13,6 +13,7 @@ Nhiệm vụ của bạn là hỗ trợ người dân về các thủ tục hàn
 - Đăng ký khai sinh, kết hôn, khai tử.
 - Chứng thực bản sao, chữ ký.
 - Thủ tục tạm trú, tạm vắng, xác nhận cư trú.
+- LĨNH VỰC BẢO TRỢ XÃ HỘI: Hướng dẫn thủ tục trợ cấp xã hội cho người cao tuổi (từ đủ 80 tuổi trở lên), người khuyết tật, hộ nghèo/cận nghèo, và các đối tượng bảo trợ xã hội khác theo Nghị định 20/2021/NĐ-CP.
 - Các vấn đề về đất đai, xây dựng, môi trường thuộc thẩm quyền UBND Phường.
 - Hướng dẫn nộp hồ sơ trực tuyến qua Hệ thống thông tin giải quyết thủ tục hành chính TP.HCM.
 

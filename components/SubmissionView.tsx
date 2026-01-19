@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ArrowLeft, FileText, ChevronRight, Info, ShieldCheck, ExternalLink, Zap } from 'lucide-react';
+import { ArrowLeft, FileText, ChevronRight, Info, ShieldCheck, ExternalLink, Zap, HeartHandshake } from 'lucide-react';
 
 interface SubmissionViewProps {
   onBack: () => void;
@@ -18,6 +18,15 @@ const PROCEDURES = [
   },
   { 
     id: 2, 
+    name: 'Thực hiện trợ cấp xã hội hàng tháng cho người cao tuổi', 
+    category: 'Bảo trợ xã hội', 
+    time: '7 ngày làm việc', 
+    fee: 'Miễn phí', 
+    hot: true,
+    url: 'https://dichvucong.hochiminhcity.gov.vn/vi/thu-tuc-hanh-chinh/chi-tiet?ma=1.000494.000.00.00.H29'
+  },
+  { 
+    id: 3, 
     name: 'Đăng ký Kết hôn', 
     category: 'Hộ tịch', 
     time: 'Trong ngày', 
@@ -25,16 +34,16 @@ const PROCEDURES = [
     hot: false,
     url: 'https://dichvucong.gov.vn/p/home/dvc-chi-tiet-thu-tuc-dung-chung.html?ma_thu_tuc=1.000894'
   },
-  { id: 3, name: 'Chứng thực bản sao từ bản chính các giấy tờ, văn bản', category: 'Chứng thực', time: '1 giờ', fee: '2.000đ/trang', hot: true, url: 'https://dichvucong.gov.vn/p/home/dvc-danh-sach-dich-vu-cong.html?tu_khoa=&bo_nganh=&tinh_thanh=Th%C3%A0nh%20ph%E1%BB%91%20H%E1%BB%93%20Ch%C3%AD%20Minh&so=&quan_huyen=Ph%C6%B0%E1%BB%9Dng%20T%C3%A2y%20Th%E1%BA%A1nh&phuong_xa=&ma_tt=2.000815&id_tinh_thanh=13460&id_quan_huyen=22024&id_phuong_xa=undefined&id_so=null&id_bo_nganh=-1' },
-{ 
+  { 
     id: 4, 
-    name: 'Đăng ký Hộ kinh doanh, doanh nghiệp', 
-    category: 'Kinh tế', 
-    time: '03 ngày', 
-    fee: 'Có phí', 
+    name: 'Hỗ trợ chi phí mai táng cho đối tượng bảo trợ xã hội', 
+    category: 'Bảo trợ xã hội', 
+    time: '3 ngày làm việc', 
+    fee: 'Miễn phí', 
     hot: false,
-    url: 'https://dichvucong.gov.vn/p/home/dvc-chi-tiet-thu-tuc-hanh-chinh.html?ma_thu_tuc=1.001612'
+    url: 'https://dichvucong.hochiminhcity.gov.vn/vi/thu-tuc-hanh-chinh/chi-tiet?ma=1.000497.000.00.00.H29'
   },
+  { id: 5, name: 'Chứng thực bản sao từ bản chính các giấy tờ, văn bản', category: 'Chứng thực', time: '1 giờ', fee: '2.000đ/trang', hot: true, url: 'https://dichvucong.gov.vn/p/home/dvc-danh-sach-dich-vu-cong.html?tu_khoa=&bo_nganh=&tinh_thanh=Th%C3%A0nh%20ph%E1%BB%91%20H%E1%BB%93%20Ch%C3%AD%20Minh&so=&quan_huyen=Ph%C6%B0%E1%BB%9Dng%20T%C3%A2y%20Th%E1%BA%A1nh&phuong_xa=&ma_tt=2.000815&id_tinh_thanh=13460&id_quan_huyen=22024&id_phuong_xa=undefined&id_so=null&id_bo_nganh=-1' },
 ];
 
 export const SubmissionView: React.FC<SubmissionViewProps> = ({ onBack }) => {
@@ -61,12 +70,12 @@ export const SubmissionView: React.FC<SubmissionViewProps> = ({ onBack }) => {
         {/* Notice Card */}
         <div className="bg-gradient-to-br from-red-50 to-orange-50 p-4 rounded-2xl border border-red-100/50 flex gap-4 shadow-sm">
           <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center text-red-600 shrink-0 shadow-sm">
-            <Info size={24} />
+            <HeartHandshake size={24} />
           </div>
           <div className="space-y-1">
-            <h4 className="text-sm font-black text-red-900">Chuẩn bị trước khi nộp</h4>
+            <h4 className="text-sm font-black text-red-900">Chính sách Bảo trợ Xã hội</h4>
             <p className="text-[11px] text-red-700/80 leading-relaxed font-medium">
-              Vui lòng chuẩn bị bản scan PDF hoặc ảnh chụp rõ nét của các giấy tờ liên quan để quá trình nộp diễn ra thuận lợi.
+              Người cao tuổi, người khuyết tật và các đối tượng chính sách được ưu tiên hỗ trợ nộp hồ sơ tại nhà qua tổ công nghệ số cộng đồng.
             </p>
           </div>
         </div>
@@ -93,7 +102,11 @@ export const SubmissionView: React.FC<SubmissionViewProps> = ({ onBack }) => {
                   </div>
                 )}
                 
-                <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-red-50 group-hover:text-red-600 transition-all shrink-0">
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all shrink-0 ${
+                  p.category === 'Bảo trợ xã hội' 
+                  ? 'bg-rose-50 text-rose-500 group-hover:bg-rose-500 group-hover:text-white' 
+                  : 'bg-slate-50 text-slate-400 group-hover:bg-red-50 group-hover:text-red-600'
+                }`}>
                   <FileText size={24} />
                 </div>
 
@@ -102,7 +115,9 @@ export const SubmissionView: React.FC<SubmissionViewProps> = ({ onBack }) => {
                     {p.name}
                   </h4>
                   <div className="flex flex-wrap gap-2 items-center">
-                    <span className="text-[9px] font-black text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                    <span className={`text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider ${
+                      p.category === 'Bảo trợ xã hội' ? 'bg-rose-100 text-rose-700' : 'bg-slate-100 text-slate-500'
+                    }`}>
                       {p.category}
                     </span>
                     <div className="flex items-center gap-1.5">
