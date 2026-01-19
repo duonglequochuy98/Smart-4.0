@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Message } from '../types';
 import { geminiService } from '../services/geminiService';
@@ -9,6 +10,7 @@ import {
   Loader2, 
   Sparkles, 
   X, 
+  Settings, 
   Cpu, 
   Ghost, 
   Smile, 
@@ -16,7 +18,8 @@ import {
   CircuitBoard,
   Copy,
   Check,
-  Lightbulb
+  Lightbulb,
+  Globe
 } from 'lucide-react';
 
 interface AIAssistantProps {
@@ -65,10 +68,7 @@ const UI_TEXT = {
     thinking: 'AI đang xử lý...',
     welcome: 'Kính chào ông/bà, tôi là Trợ lý AI Smart 4.0 Plus của Phường Tây Thạnh. Tôi có thể giúp gì cho ông/bà hôm nay?',
     confirm: 'Xác nhận',
-    personalization: 'Cá nhân hóa AI',
-    errorGeneric: 'Hệ thống đang bận cập nhật, vui lòng thử lại sau.',
-    errorAPI: '⚠️ Lỗi kết nối API. Vui lòng liên hệ quản trị viên.',
-    disclaimer: 'Tất cả câu trả lời tuân thủ quy định hành chính hiện hành tại Phường Tây Thạnh.'
+    personalization: 'Cá nhân hóa AI'
   },
   en: {
     title: 'Assistant',
@@ -76,10 +76,7 @@ const UI_TEXT = {
     thinking: 'AI is thinking...',
     welcome: 'Welcome, I am the Smart 4.0 Plus AI Assistant of Tay Thanh Ward. How can I assist you today?',
     confirm: 'Confirm',
-    personalization: 'AI Personalization',
-    errorGeneric: 'System is busy updating, please try again later.',
-    errorAPI: '⚠️ API connection error. Please contact administrator.',
-    disclaimer: 'All responses comply with current administrative regulations in Tay Thanh Ward.'
+    personalization: 'AI Personalization'
   }
 };
 
@@ -95,14 +92,13 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ onBack }) => {
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Auto scroll to bottom
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages, isLoading]);
 
-  // Update welcome message when language changes
+  // Update welcome message when language changes if no conversation started
   useEffect(() => {
     if (messages.length === 1) {
       setMessages([{ role: 'model', text: UI_TEXT[lang].welcome }]);
@@ -119,33 +115,16 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ onBack }) => {
     setIsLoading(true);
 
     try {
-      // Thêm language instruction
-      const langInstruction = lang === 'en' 
-        ? "Please respond in English." 
-        : "Hãy phản hồi bằng tiếng Việt.";
-      
-      const fullPrompt = `${langInstruction}\n\n${textToSend}`;
-      
-      // Gọi Gemini API
-      const reply = await geminiService.sendMessage(messages, fullPrompt);
-      
+      // Pass the selected language to the service to guide the AI
+      const langInstruction = lang === 'en' ? "Please respond in English." : "Hãy phản hồi bằng tiếng Việt.";
+      const reply = await geminiService.sendMessage(messages, `${langInstruction} User input: ${textToSend}`);
+      setMessages(prev => [...prev, { role: 'model', text: reply || (lang === 'vi' ? 'Xin lỗi, tôi gặp sự cố.' : 'Sorry, I encountered an error.') }]);
+    } catch (error) {
       setMessages(prev => [...prev, { 
         role: 'model', 
-        text: reply || UI_TEXT[lang].errorGeneric
-      }]);
-    } catch (error: any) {
-      console.error('AI Error:', error);
-      
-      // Xử lý error message dựa trên error type
-      let errorText = UI_TEXT[lang].errorGeneric;
-      
-      if (error.message?.includes('API') || error.message?.includes('⚠️')) {
-        errorText = UI_TEXT[lang].errorAPI;
-      }
-      
-      setMessages(prev => [...prev, { 
-        role: 'model', 
-        text: errorText
+        text: lang === 'vi' 
+          ? 'Hệ thống đang bận cập nhật, vui lòng thử lại sau.' 
+          : 'System is busy updating, please try again later.' 
       }]);
     } finally {
       setIsLoading(false);
@@ -241,8 +220,6 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ onBack }) => {
             </div>
           </div>
         ))}
-        
-        {/* Loading indicator */}
         {isLoading && (
           <div className="flex justify-start">
             <div className="flex gap-2.5 items-start">
@@ -289,10 +266,9 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ onBack }) => {
             type="text" 
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
+            onKeyDown={(e) => e.key === 'Enter' && handleSend()}
             placeholder={UI_TEXT[lang].placeholder} 
             className="flex-1 bg-transparent px-4 py-2.5 text-sm focus:outline-none text-slate-700 placeholder:text-slate-400 font-bold"
-            disabled={isLoading}
           />
           <button 
             onClick={() => handleSend()}
@@ -343,7 +319,9 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ onBack }) => {
             <div className="mt-8 space-y-4">
               <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
                  <p className="text-[11px] font-bold text-slate-500 leading-relaxed italic">
-                   "{UI_TEXT[lang].disclaimer}"
+                   {lang === 'vi' 
+                     ? '"Tất cả câu trả lời tuân thủ quy định hành chính hiện hành tại Phường Tây Thạnh."'
+                     : '"All responses comply with current administrative regulations in Tay Thanh Ward."'}
                  </p>
               </div>
               <button 
