@@ -303,7 +303,7 @@ export const BookingView: React.FC<BookingViewProps> = ({ onBack, onAddNotificat
                  </div>
                  <div className="space-y-1 text-right">
                     <p className="text-[9px] font-black text-yellow-400/40 uppercase tracking-[0.2em]">Vị trí</p>
-                    <p className="text-lg font-black text-yellow-200 uppercase">Quầy số{counter}</p>
+                    <p className="text-lg font-black text-yellow-200 uppercase">Quầy số {counter}</p>
                  </div>
                </div>
 
