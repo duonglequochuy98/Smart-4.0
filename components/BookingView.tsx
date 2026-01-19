@@ -184,7 +184,7 @@ export const BookingView: React.FC<BookingViewProps> = ({ onBack, onAddNotificat
     ctx.fillText('VỊ TRÍ TIẾP NHẬN', 890, 790);
     ctx.fillStyle = '#facc15';
     ctx.font = '900 50px Plus Jakarta Sans';
-    ctx.fillText(`QUẦY ${getCounterNumber(formData.service)}`, 890, 860);
+    ctx.fillText(`QUẦY SỐ ${getCounterNumber(formData.service)}`, 890, 860);
     ctx.textAlign = 'left';
 
     const infoY = Math.max(1000, currentY + 100);
