@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Message } from '../types';
 import { geminiService } from '../services/geminiService';
@@ -271,3 +270,4 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ onBack }) => {
     </div>
   );
 };
+
