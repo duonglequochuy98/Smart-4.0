@@ -38,67 +38,32 @@ MỤC TIÊU:
 Phản hồi đầy đủ, dễ hiểu, tạo cảm giác an tâm và hiện đại cho người dân thông qua các biểu tượng trực quan về Tốc độ và Bảo mật.`;
 
 export class GeminiService {
-  private genAI: GoogleGenerativeAI | null = null;
-  private model: any = null;
+  private ai: GoogleGenAI;
 
   constructor() {
-    // Khởi tạo với API key từ biến môi trường
-    this.initializeWithEnvKey();
+    this.ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
   }
 
-  private initializeWithEnvKey() {
-    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-    
-    if (!apiKey) {
-      console.warn('⚠️ VITE_GEMINI_API_KEY chưa được thiết lập trong file .env');
-      return;
-    }
-
-    this.setApiKey(apiKey);
-  }
-
-  setApiKey(apiKey: string) {
-    if (!apiKey) {
-      throw new Error('API Key không được để trống');
-    }
-
-    this.genAI = new GoogleGenerativeAI(apiKey);
-    this.model = this.genAI.getGenerativeModel({
-      model: "gemini-1.5-flash",
-      systemInstruction: SYSTEM_INSTRUCTION,
-      generationConfig: {
-        temperature: 0.3,
-        topP: 0.9,
-        maxOutputTokens: 2048,
-      }
-    });
-  }
-
-  getApiKey(): string {
-    return import.meta.env.VITE_GEMINI_API_KEY || '';
-  }
-
-  isInitialized(): boolean {
-    return this.model !== null;
-  }
-
-  async sendMessage(history: Message[], userInput: string): Promise<string> {
-    if (!this.model) {
-      throw new Error('API Key chưa được thiết lập. Vui lòng kiểm tra biến môi trường VITE_GEMINI_API_KEY');
-    }
-
+  async sendMessage(history: Message[], userInput: string) {
     try {
-      // Tạo chat với history
-      const chat = this.model.startChat({
-        history: history.map(msg => ({
-          role: msg.role === 'model' ? 'model' : 'user',
-          parts: [{ text: msg.text }]
-        }))
+      const response = await this.ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: {
+          parts: [
+            ...history.map(m => ({
+              text: `${m.role === 'model' ? 'Assistant:' : 'User:'} ${m.text}`
+            })),
+            { text: userInput }
+          ]
+        },
+        config: {
+          systemInstruction: SYSTEM_INSTRUCTION,
+          temperature: 0.3, 
+          topP: 0.9,
+        },
       });
 
-      const result = await chat.sendMessage(userInput);
-      const response = await result.response;
-      return response.text();
+      return response.text;
     } catch (error) {
       console.error("Gemini API Error:", error);
       throw error;
