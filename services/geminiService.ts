@@ -1,176 +1,67 @@
-import { Message } from '../types';
 
-const SYSTEM_INSTRUCTION = `Bạn là Trợ lý AI Smart 4.0 Plus của UBND Phường Tây Thạnh, Quận Tân Phú, TP.HCM.
+import { GoogleGenAI } from "@google/genai";
+import { Message } from "../types";
 
-THÔNG TIN CHÍNH:
-- Địa chỉ: 123/45 Đường Tây Thạnh, Phường Tây Thạnh, Quận Tân Phú, TP.HCM
-- Điện thoại: (028) 3123 4567
-- Email: ubndtaythanh@tphcm.gov.vn
-- Giờ làm việc: Thứ 2-6: 7h30-17h30, Thứ 7: 7h30-11h30
+const SYSTEM_INSTRUCTION = `BẠN LÀ "TRỢ LÝ AI SMART 4.0 PLUS" - ĐẠI DIỆN SỐ CỦA UBND PHƯỜNG TÂY THẠNH.
 
-DỊCH VỤ CHÍNH:
-1. Khai sinh, Khai tử
-2. Đăng ký kết hôn  
-3. Chứng thực bản sao
-4. Đăng ký tạm trú
-5. Cấp giấy phép kinh doanh
+NHIỆM VỤ CHÍNH: Hướng dẫn thủ tục hành chính ngắn gọn nhưng đầy đủ từng bước, tập trung vào nộp trực tuyến.
 
-Trả lời ngắn gọn, rõ ràng (tối đa 3-4 câu), lịch sự và chuyên nghiệp.`;
+PHONG CÁCH PHẢN HỒI:
+- Ngôn ngữ: Dạ, thưa ông/bà (Lịch sự, chuyên nghiệp).
+- Cấu trúc: Chia rõ các bước 1, 2, 3.
 
-// Danh sách models để thử (theo thứ tự ưu tiên)
-const MODELS = [
-  'gemini-1.5-flash-latest',
-  'gemini-1.5-flash',
-  'gemini-pro',
-  'gemini-1.5-pro-latest'
-];
+QUY TẮC NỘI DUNG (BẮT BUỘC):
 
-class GeminiService {
-  private apiKey: string | null = null;
-  private currentModelIndex: number = 0;
+1. HƯỚNG DẪN CHI TIẾT THEO CẤU TRÚC:
+   - 📄 **Hồ sơ cần có**: Liệt kê các giấy tờ cần quét/chụp (Scan).
+   - 💻 **Nộp trực tuyến**: 
+     + Bước 1: Truy cập Cổng DVC Quốc gia (dichvucong.gov.vn) hoặc TP.HCM (dichvucong.hochiminhcity.gov.vn).
+     + Bước 2: Đăng nhập bằng định danh điện tử VNeID.
+     + Bước 3: Tìm tên thủ tục, tải file hồ sơ và ký số/xác nhận.
+   - ⚡ **Tốc độ**: Nêu thời gian xử lý (Ví dụ: 1-3 ngày làm việc).
+   - 🛡️ **Bảo mật**: Cam kết dữ liệu cá nhân được mã hóa và bảo vệ đúng luật.
+
+2. QUY TẮC "ẨN" BỘ MÁY:
+   - Không nhắc đến lãnh đạo hay Phó Giám đốc Trung tâm trừ khi bị hỏi đích danh.
+   - Nếu bị hỏi: Trả lời ngắn gọn rằng đây là chức danh giúp đôn đốc hồ sơ ⚡ NHANH và 🛡️ AN TOÀN.
+
+3. GIỚI HẠN:
+   - Địa chỉ: 200/12 Nguyễn Hữu Tiến, Phường Tây Thạnh.
+   - TUYỆT ĐỐI KHÔNG dùng từ "Quận Tân Phú".
+
+MỤC TIÊU: Giúp người dân tự nộp hồ sơ trực tuyến thành công ngay lần đầu.`;
+
+export class GeminiService {
+  private ai: GoogleGenAI;
 
   constructor() {
-    this.initialize();
+    this.ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
   }
 
-  private initialize() {
+  async sendMessage(history: Message[], userInput: string) {
     try {
-      console.log('🔍 Checking environment variables...');
-      console.log('VITE_GEMINI_API_KEY:', import.meta.env.VITE_GEMINI_API_KEY ? 'Found ✅' : 'Not found ❌');
-      
-      this.apiKey = 
-        import.meta.env.VITE_GEMINI_API_KEY || 
-        import.meta.env.GEMINI_API_KEY ||
-        null;
-      
-      if (!this.apiKey || this.apiKey.trim() === '') {
-        console.error('❌ API key chưa được cấu hình!');
-      } else {
-        console.log('✅ Gemini Service initialized');
-        console.log('🔑 API Key:', this.apiKey.substring(0, 10) + '...');
-        console.log('📋 Available models:', MODELS.join(', '));
-      }
+      const response = await this.ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: {
+          parts: [
+            ...history.map(m => ({
+              text: `${m.role === 'model' ? 'Assistant:' : 'User:'} ${m.text}`
+            })),
+            { text: userInput }
+          ]
+        },
+        config: {
+          systemInstruction: SYSTEM_INSTRUCTION,
+          temperature: 0.2, 
+          topP: 0.8,
+        },
+      });
+
+      return response.text;
     } catch (error) {
-      console.error('❌ Init error:', error);
+      console.error("Gemini API Error:", error);
+      throw error;
     }
-  }
-
-  async sendMessage(history: Message[], userInput: string): Promise<string> {
-    console.log('📤 Sending message to Gemini API...');
-    
-    try {
-      if (!this.apiKey || this.apiKey === 'your_api_key_here') {
-        return '⚠️ API key chưa được cấu hình. Vui lòng liên hệ quản trị viên.';
-      }
-
-      // Tạo contents
-      const contents = [
-        {
-          role: 'user',
-          parts: [{ text: SYSTEM_INSTRUCTION }]
-        },
-        {
-          role: 'model',
-          parts: [{ text: 'Tôi hiểu. Tôi sẽ hỗ trợ như nhân viên UBND Phường Tây Thạnh.' }]
-        },
-        ...history.slice(1).map(msg => ({
-          role: msg.role === 'model' ? 'model' : 'user',
-          parts: [{ text: msg.text }]
-        })),
-        {
-          role: 'user',
-          parts: [{ text: userInput }]
-        }
-      ];
-
-      // Thử từng model cho đến khi thành công
-      for (let i = 0; i < MODELS.length; i++) {
-        const modelName = MODELS[(this.currentModelIndex + i) % MODELS.length];
-        
-        try {
-          console.log(`🤖 Trying model: ${modelName}`);
-          
-          const apiUrl = `https://generativelanguage.googleapis.com/v1/models/${modelName}:generateContent?key=${this.apiKey}`;
-
-          const response = await fetch(apiUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              contents: contents,
-              generationConfig: {
-                temperature: 0.7,
-                topP: 0.95,
-                topK: 40,
-                maxOutputTokens: 1024,
-              },
-              safetySettings: [
-                {
-                  category: 'HARM_CATEGORY_HARASSMENT',
-                  threshold: 'BLOCK_NONE'
-                },
-                {
-                  category: 'HARM_CATEGORY_HATE_SPEECH',
-                  threshold: 'BLOCK_NONE'
-                },
-                {
-                  category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
-                  threshold: 'BLOCK_NONE'
-                },
-                {
-                  category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
-                  threshold: 'BLOCK_NONE'
-                }
-              ]
-            })
-          });
-
-          console.log(`📊 Response status: ${response.status}`);
-
-          if (!response.ok) {
-            const errorText = await response.text();
-            console.warn(`⚠️ Model ${modelName} failed:`, errorText);
-            continue; // Thử model tiếp theo
-          }
-
-          const data = await response.json();
-          const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-          if (!text) {
-            console.warn(`⚠️ Model ${modelName} returned no text`);
-            continue; // Thử model tiếp theo
-          }
-
-          // Thành công - lưu lại model này để dùng lần sau
-          this.currentModelIndex = (this.currentModelIndex + i) % MODELS.length;
-          console.log(`✅ Success with model: ${modelName}`);
-          console.log(`💬 Response:`, text.substring(0, 100) + '...');
-          
-          return text;
-
-        } catch (modelError: any) {
-          console.warn(`⚠️ Model ${modelName} error:`, modelError.message);
-          continue; // Thử model tiếp theo
-        }
-      }
-
-      // Nếu tất cả models đều fail
-      return '❌ Không thể kết nối với Gemini API. Vui lòng thử lại sau hoặc liên hệ Zalo OA để được hỗ trợ trực tiếp.';
-
-    } catch (error: any) {
-      console.error('❌ Fatal error:', error);
-      
-      if (error.name === 'TypeError' && error.message.includes('fetch')) {
-        return '🌐 Lỗi kết nối mạng. Vui lòng kiểm tra internet.';
-      }
-
-      return `❌ Lỗi: ${error.message}. Vui lòng thử lại sau.`;
-    }
-  }
-
-  resetChat() {
-    console.log('🔄 Chat reset');
   }
 }
 
