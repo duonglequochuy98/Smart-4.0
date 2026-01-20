@@ -5,30 +5,18 @@ import react from '@vitejs/plugin-react';
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, '.', '');
     return {
-      base: '/', // Quan trọng cho Vercel
       server: {
         port: 3000,
         host: '0.0.0.0',
       },
       plugins: [react()],
       define: {
-        // Expose API key to client
-        'import.meta.env.VITE_GEMINI_API_KEY': JSON.stringify(
-          env.VITE_GEMINI_API_KEY || env.GEMINI_API_KEY
-        )
+        'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
+        'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
       },
       resolve: {
         alias: {
           '@': path.resolve(__dirname, '.'),
-        }
-      },
-      build: {
-        outDir: 'dist',
-        sourcemap: false,
-        rollupOptions: {
-          output: {
-            manualChunks: undefined
-          }
         }
       }
     };
