@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { Message } from "../types";
 
 const SYSTEM_INSTRUCTION = `BẠN LÀ "TRỢ LÝ AI SMART 4.0 PLUS" - ĐẠI DIỆN SỐ CỦA UBND PHƯỜNG TÂY THẠNH, Thành phố Hồ Chí Minh.
@@ -40,7 +40,7 @@ export class GeminiService {
   private genAI: GoogleGenerativeAI;
 
   constructor() {
-    // Lấy API key từ process.env (Vercel sẽ inject)
+    // Lấy API key từ environment variables
     const apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY || '';
     
     if (!apiKey) {
@@ -55,9 +55,9 @@ export class GeminiService {
 
   async sendMessage(history: Message[], userInput: string): Promise<string> {
     try {
-      // Khởi tạo model với cấu hình
+      // Khởi tạo model với system instruction
       const model = this.genAI.getGenerativeModel({
-        model: "gemini-1.5-flash", // Sử dụng model đúng
+        model: "gemini-1.5-flash",
         systemInstruction: SYSTEM_INSTRUCTION,
       });
 
