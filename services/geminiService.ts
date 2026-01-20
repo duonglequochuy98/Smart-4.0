@@ -41,17 +41,30 @@ export class GeminiService {
   private model: any;
 
   constructor() {
-    const apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY;
+    // Thử TẤT CẢ các cách lấy API key cho cả local và Vercel
+    const apiKey = 
+      import.meta.env.VITE_GEMINI_API_KEY || 
+      import.meta.env.GEMINI_API_KEY ||
+      import.meta.env.API_KEY ||
+      (typeof process !== 'undefined' && process.env?.VITE_GEMINI_API_KEY) ||
+      (typeof process !== 'undefined' && process.env?.GEMINI_API_KEY) ||
+      (typeof process !== 'undefined' && process.env?.API_KEY) ||
+      '';
     
     if (!apiKey) {
-      throw new Error('⚠️ Thiếu API key! Vui lòng cấu hình GEMINI_API_KEY trong .env');
+      console.error('⚠️ Thiếu API key! Các biến môi trường:', {
+        vite_gemini: import.meta.env.VITE_GEMINI_API_KEY ? 'có' : 'không',
+        gemini: import.meta.env.GEMINI_API_KEY ? 'có' : 'không',
+        process: typeof process !== 'undefined' ? 'có' : 'không'
+      });
+      throw new Error('⚠️ Thiếu API key! Vui lòng cấu hình GEMINI_API_KEY hoặc VITE_GEMINI_API_KEY');
     }
 
     this.genAI = new GoogleGenerativeAI(apiKey);
     
     // Khởi tạo model với system instruction
     this.model = this.genAI.getGenerativeModel({
-      model: "gemini-2.0-flash-exp", // Hoặc "gemini-1.5-flash"
+      model: "gemini-2.0-flash-exp", // Model mới nhất
       systemInstruction: SYSTEM_INSTRUCTION,
       generationConfig: {
         temperature: 0.3,
@@ -85,16 +98,16 @@ export class GeminiService {
       
       // Xử lý các lỗi phổ biến
       if (error.message?.includes('API key')) {
-        throw new Error('🔑 API key không hợp lệ hoặc đã hết hạn');
+        return '🔑 Xin lỗi, hệ thống AI đang gặp vấn đề với xác thực. Vui lòng liên hệ quản trị viên.';
       }
       if (error.message?.includes('quota')) {
-        throw new Error('⚠️ Đã vượt quá giới hạn API. Vui lòng thử lại sau');
+        return '⚠️ Hệ thống AI đang quá tải. Vui lòng thử lại sau vài phút hoặc liên hệ hotline 028 3815 5127.';
       }
       if (error.message?.includes('SAFETY')) {
-        throw new Error('🛡️ Nội dung vi phạm chính sách an toàn của Gemini');
+        return '🛡️ Nội dung này vi phạm chính sách an toàn. Vui lòng diễn đạt lại câu hỏi.';
       }
       
-      throw new Error(`Lỗi không xác định: ${error.message}`);
+      return `Xin lỗi, tôi đang gặp sự cố kỹ thuật. Vui lòng thử lại sau hoặc liên hệ hotline 028 3815 5127 để được hỗ trợ trực tiếp.`;
     }
   }
 }
