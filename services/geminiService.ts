@@ -1,116 +1,128 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import { Message } from "../types";
+import { GoogleGenerativeAI } from '@google/genai';
+import { Message } from '../types';
 
-const SYSTEM_INSTRUCTION = `BẠN LÀ "TRỢ LÝ AI SMART 4.0 PLUS" - ĐẠI DIỆN SỐ CỦA UBND PHƯỜNG TÂY THẠNH, Thành phố Hồ Chí Minh.
-
-NGÔN NGỮ & XƯNG HÔ:
-- Hỗ trợ Tiếng Việt (chính) và Tiếng Anh.
-- Luôn mở đầu bằng: "Dạ, Trợ lý AI xin kính chào ông/bà" hoặc "Kính thưa ông/bà".
-- Phong cách: Tận tâm, chi tiết, chuyên nghiệp. Sử dụng EMOJI để làm nổi bật các ý quan trọng.
-
-QUY TẮC PHẢN HỒI CHI TIẾT (SỬ DỤNG ICON):
-1. KHI HỎI VỀ THỦ TỤC HÀNH CHÍNH:
-   Trả lời CHI TIẾT và TRỰC QUAN theo cấu trúc sau:
-   - 📄 **Hồ sơ cần chuẩn bị**: (Liệt kê danh sách giấy tờ kèm lưu ý bản chính/sao).
-   - ⚡ **Tốc độ xử lý**: (Nêu rõ thời gian giải quyết dự kiến để người dân yên tâm).
-   - 💰 **Lệ phí niêm yết**: (Mức phí minh bạch).
-   - 🛡️ **Bảo mật & Pháp lý**: (Cam kết bảo mật thông tin cá nhân 100% trên hệ thống số).
-   - 📍 **Địa điểm**: 200/12 Nguyễn Hữu Tiến, Phường Tây Thạnh.
-   - 💡 **Mẹo nhỏ**: Hướng dẫn sử dụng nút [NỘP HỒ SƠ] để xử lý nhanh nhất.
-
-2. CÁC BIỂU TƯỢNG ƯU TIÊN SỬ DỤNG:
-   - 🛡️: Dùng khi nhắc đến bảo mật dữ liệu, an toàn thông tin.
-   - ⚡: Dùng khi nhắc đến thời gian xử lý nhanh, nộp hồ sơ trực tuyến.
-   - 💎: Dùng khi nhắc đến chất lượng phục vụ chuyên nghiệp.
-   - 📅: Dùng cho lịch hẹn.
-   - 💬: Dùng khi hướng dẫn hỗ trợ.
-
-3. QUY TẮC "ẨN" THÔNG TIN TỔ CHỨC (CỰC KỲ QUAN TRỌNG):
-   - Tuyệt đối KHÔNG tự ý giới thiệu về "Phó Giám đốc Trung tâm Hành chính công" nếu không được hỏi.
-   - CHỈ TRẢ LỜI khi được hỏi đích danh các câu liên quan đến người quản lý hoặc đôn đốc hồ sơ.
-   - Nội dung khi hỏi: Đây là chức danh chuyên trách mới 💎 giúp đôn đốc công chức xử lý hồ sơ của ông/bà ⚡ NHANH CHÓNG và 🛡️ ĐÚNG LUẬT.
-
-4. GIỚI HẠN ĐỊA PHƯƠNG:
-   - Chỉ nhắc đến Phường Tây Thạnh, TP.HCM. Tuyệt đối KHÔNG nhắc đến "Quận Tân Phú".
-
-MỤC TIÊU: 
-Phản hồi đầy đủ, dễ hiểu, tạo cảm giác an tâm và hiện đại cho người dân thông qua các biểu tượng trực quan về Tốc độ và Bảo mật.`;
-
-export class GeminiService {
-  private genAI: GoogleGenerativeAI;
+class GeminiService {
+  private genAI: GoogleGenerativeAI | null = null;
+  private model: any = null;
+  private chat: any = null;
 
   constructor() {
-    // Lấy API key từ environment variables
-    const apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY || '';
-    
-    if (!apiKey) {
-      console.error('⚠️ GEMINI_API_KEY chưa được cấu hình!');
-      console.error('Vui lòng thêm GEMINI_API_KEY vào Environment Variables trên Vercel');
-    } else {
-      console.log('✅ API Key detected:', apiKey.substring(0, 8) + '...');
-    }
+    this.initialize();
+  }
 
-    this.genAI = new GoogleGenerativeAI(apiKey);
+  private initialize() {
+    try {
+      // Lấy API key từ biến môi trường
+      const apiKey = import.meta.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
+      
+      if (!apiKey) {
+        console.warn('⚠️ Gemini API key chưa được cấu hình');
+        return;
+      }
+
+      this.genAI = new GoogleGenerativeAI(apiKey);
+      this.model = this.genAI.getGenerativeModel({ 
+        model: 'gemini-1.5-flash',
+        generationConfig: {
+          temperature: 0.7,
+          topP: 0.95,
+          topK: 40,
+          maxOutputTokens: 1024,
+        }
+      });
+
+      // Khởi tạo chat với system instruction
+      const systemInstruction = `Bạn là Trợ lý AI Smart 4.0 Plus của UBND Phường Tây Thạnh, Quận Tân Phú, TP.HCM.
+
+THÔNG TIN CHÍNH:
+- Địa chỉ: 123/45 Đường Tây Thạnh, Phường Tây Thạnh, Quận Tân Phú, TP.HCM
+- Điện thoại: (028) 3123 4567
+- Email: ubndtaythanh@tphcm.gov.vn
+- Giờ làm việc: Thứ 2-6: 7h30-17h30, Thứ 7: 7h30-11h30
+- Trung tâm Hành chính công: Tầng 1, số 123/45 Tây Thạnh
+
+BAN LÃNH ĐẠO:
+- Giám đốc: Ông Nguyễn Văn A
+- Phó Giám đốc: Bà Trần Thị B
+
+DỊCH VỤ CHÍNH:
+1. Khai sinh, Khai tử
+2. Đăng ký kết hôn
+3. Chứng thực bản sao, chữ ký
+4. Đăng ký tạm trú, tạm vắng
+5. Cấp giấy phép kinh doanh
+
+PHÍ DỊCH VỤ:
+- Khai sinh: Miễn phí (trong 60 ngày)
+- Chứng thực: 5.000đ/bản
+- Hộ chiếu: 200.000đ (thường), 400.000đ (gấp)
+- CCCD: Miễn phí
+
+HƯỚNG DẪN:
+- Luôn lịch sự, chuyên nghiệp
+- Trả lời ngắn gọn, rõ ràng
+- Hướng dẫn từng bước nếu cần
+- Đề xuất liên hệ trực tiếp nếu phức tạp
+- Hỗ trợ cả Tiếng Việt và English`;
+
+      this.chat = this.model.startChat({
+        history: [],
+        systemInstruction: systemInstruction
+      });
+
+      console.log('✅ Gemini Service đã khởi tạo thành công');
+    } catch (error) {
+      console.error('❌ Lỗi khởi tạo Gemini Service:', error);
+    }
   }
 
   async sendMessage(history: Message[], userInput: string): Promise<string> {
     try {
-      // Khởi tạo model với system instruction
-      const model = this.genAI.getGenerativeModel({
-        model: "gemini-1.5-flash",
-        systemInstruction: SYSTEM_INSTRUCTION,
-      });
+      // Kiểm tra xem service đã được khởi tạo chưa
+      if (!this.chat) {
+        throw new Error('Service chưa được khởi tạo. Vui lòng kiểm tra API key.');
+      }
 
-      // Chuyển đổi lịch sử chat sang format Gemini
-      const chatHistory = history.slice(1).map(msg => ({
-        role: msg.role === 'user' ? 'user' : 'model',
-        parts: [{ text: msg.text }],
-      }));
-
-      // Tạo chat session
-      const chat = model.startChat({
-        history: chatHistory,
-        generationConfig: {
-          temperature: 0.7,
-          topP: 0.9,
-          maxOutputTokens: 1024,
-        },
-      });
-
-      // Gửi message và nhận response
-      const result = await chat.sendMessage(userInput);
+      // Gửi tin nhắn
+      const result = await this.chat.sendMessage(userInput);
       const response = await result.response;
       const text = response.text();
 
       if (!text) {
-        throw new Error('Empty response from Gemini');
+        throw new Error('Không nhận được phản hồi từ AI');
       }
 
       return text;
-
     } catch (error: any) {
-      console.error("❌ Gemini API Error:", error);
+      console.error('❌ Lỗi khi gọi Gemini API:', error);
       
       // Xử lý các loại lỗi cụ thể
-      if (error.message?.includes('API_KEY_INVALID') || error.message?.includes('API key')) {
-        console.error('API Key không hợp lệ. Kiểm tra lại GEMINI_API_KEY trên Vercel.');
-        throw new Error('API key không hợp lệ');
+      if (error?.message?.includes('API key')) {
+        return 'Lỗi: API key chưa được cấu hình đúng. Vui lòng kiểm tra file .env.local';
       }
       
-      if (error.message?.includes('quota') || error.message?.includes('RESOURCE_EXHAUSTED')) {
-        console.error('Hạn mức API đã vượt quá. Kiểm tra quota tại: https://aistudio.google.com/');
-        throw new Error('Hạn mức API đã hết');
+      if (error?.message?.includes('quota') || error?.message?.includes('limit')) {
+        return 'Hệ thống đang quá tải. Vui lòng thử lại sau vài phút.';
       }
 
-      if (error.message?.includes('model not found') || error.message?.includes('MODEL_NOT_FOUND')) {
-        console.error('Model không tồn tại. Sử dụng: gemini-1.5-flash hoặc gemini-pro');
-        throw new Error('Model không hợp lệ');
+      if (error?.message?.includes('network') || error?.message?.includes('fetch')) {
+        return 'Lỗi kết nối mạng. Vui lòng kiểm tra internet và thử lại.';
       }
 
       // Lỗi chung
-      throw new Error('Hệ thống đang bận, vui lòng thử lại sau');
+      return 'Xin lỗi, hệ thống đang bận cập nhật. Vui lòng thử lại sau hoặc liên hệ Zalo OA để được hỗ trợ trực tiếp.';
+    }
+  }
+
+  // Reset chat history nếu cần
+  resetChat() {
+    if (this.model) {
+      this.chat = this.model.startChat({
+        history: []
+      });
     }
   }
 }
 
+// Export singleton instance
 export const geminiService = new GeminiService();
