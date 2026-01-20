@@ -1,5 +1,4 @@
-
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/genai";
 import { Message } from "../types";
 
 const SYSTEM_INSTRUCTION = `BẠN LÀ "TRỢ LÝ AI SMART 4.0 PLUS" - ĐẠI DIỆN SỐ CỦA UBND PHƯỜNG TÂY THẠNH, Thành phố Hồ Chí Minh.
@@ -10,7 +9,6 @@ NGÔN NGỮ & XƯNG HÔ:
 - Phong cách: Tận tâm, chi tiết, chuyên nghiệp. Sử dụng EMOJI để làm nổi bật các ý quan trọng.
 
 QUY TẮC PHẢN HỒI CHI TIẾT (SỬ DỤNG ICON):
-
 1. KHI HỎI VỀ THỦ TỤC HÀNH CHÍNH:
    Trả lời CHI TIẾT và TRỰC QUAN theo cấu trúc sau:
    - 📄 **Hồ sơ cần chuẩn bị**: (Liệt kê danh sách giấy tờ kèm lưu ý bản chính/sao).
@@ -39,35 +37,78 @@ MỤC TIÊU:
 Phản hồi đầy đủ, dễ hiểu, tạo cảm giác an tâm và hiện đại cho người dân thông qua các biểu tượng trực quan về Tốc độ và Bảo mật.`;
 
 export class GeminiService {
-  private ai: GoogleGenAI;
+  private genAI: GoogleGenerativeAI;
 
   constructor() {
-    this.ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+    // Lấy API key từ process.env (Vercel sẽ inject)
+    const apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY || '';
+    
+    if (!apiKey) {
+      console.error('⚠️ GEMINI_API_KEY chưa được cấu hình!');
+      console.error('Vui lòng thêm GEMINI_API_KEY vào Environment Variables trên Vercel');
+    } else {
+      console.log('✅ API Key detected:', apiKey.substring(0, 8) + '...');
+    }
+
+    this.genAI = new GoogleGenerativeAI(apiKey);
   }
 
-  async sendMessage(history: Message[], userInput: string) {
+  async sendMessage(history: Message[], userInput: string): Promise<string> {
     try {
-      const response = await this.ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: {
-          parts: [
-            ...history.map(m => ({
-              text: `${m.role === 'model' ? 'Assistant:' : 'User:'} ${m.text}`
-            })),
-            { text: userInput }
-          ]
-        },
-        config: {
-          systemInstruction: SYSTEM_INSTRUCTION,
-          temperature: 0.3, 
+      // Khởi tạo model với cấu hình
+      const model = this.genAI.getGenerativeModel({
+        model: "gemini-1.5-flash", // Sử dụng model đúng
+        systemInstruction: SYSTEM_INSTRUCTION,
+      });
+
+      // Chuyển đổi lịch sử chat sang format Gemini
+      const chatHistory = history.slice(1).map(msg => ({
+        role: msg.role === 'user' ? 'user' : 'model',
+        parts: [{ text: msg.text }],
+      }));
+
+      // Tạo chat session
+      const chat = model.startChat({
+        history: chatHistory,
+        generationConfig: {
+          temperature: 0.7,
           topP: 0.9,
+          maxOutputTokens: 1024,
         },
       });
 
-      return response.text;
-    } catch (error) {
-      console.error("Gemini API Error:", error);
-      throw error;
+      // Gửi message và nhận response
+      const result = await chat.sendMessage(userInput);
+      const response = await result.response;
+      const text = response.text();
+
+      if (!text) {
+        throw new Error('Empty response from Gemini');
+      }
+
+      return text;
+
+    } catch (error: any) {
+      console.error("❌ Gemini API Error:", error);
+      
+      // Xử lý các loại lỗi cụ thể
+      if (error.message?.includes('API_KEY_INVALID') || error.message?.includes('API key')) {
+        console.error('API Key không hợp lệ. Kiểm tra lại GEMINI_API_KEY trên Vercel.');
+        throw new Error('API key không hợp lệ');
+      }
+      
+      if (error.message?.includes('quota') || error.message?.includes('RESOURCE_EXHAUSTED')) {
+        console.error('Hạn mức API đã vượt quá. Kiểm tra quota tại: https://aistudio.google.com/');
+        throw new Error('Hạn mức API đã hết');
+      }
+
+      if (error.message?.includes('model not found') || error.message?.includes('MODEL_NOT_FOUND')) {
+        console.error('Model không tồn tại. Sử dụng: gemini-1.5-flash hoặc gemini-pro');
+        throw new Error('Model không hợp lệ');
+      }
+
+      // Lỗi chung
+      throw new Error('Hệ thống đang bận, vui lòng thử lại sau');
     }
   }
 }
