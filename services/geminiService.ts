@@ -1,5 +1,3 @@
-
-import { GoogleGenAI } from "@google/generative-ai";
 import { Message } from "../types";
 
 const SYSTEM_INSTRUCTION = `BẠN LÀ "TRỢ LÝ AI SMART 4.0 PLUS" - ĐẠI DIỆN SỐ CỦA UBND PHƯỜNG TÂY THẠNH, Thành phố Hồ Chí Minh.
@@ -39,32 +37,69 @@ MỤC TIÊU:
 Phản hồi đầy đủ, dễ hiểu, tạo cảm giác an tâm và hiện đại cho người dân thông qua các biểu tượng trực quan về Tốc độ và Bảo mật.`;
 
 export class GeminiService {
-  private ai: GoogleGenAI;
+  private apiKey: string = '';
+  private apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent';
 
-  constructor() {
-    this.ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+  setApiKey(key: string) {
+    this.apiKey = key;
   }
 
-  async sendMessage(history: Message[], userInput: string) {
+  getApiKey(): string {
+    return this.apiKey;
+  }
+
+  async sendMessage(history: Message[], userInput: string): Promise<string> {
+    if (!this.apiKey) {
+      throw new Error('API Key not set');
+    }
+
     try {
-      const response = await this.ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: {
-          parts: [
-            ...history.map(m => ({
-              text: `${m.role === 'model' ? 'Assistant:' : 'User:'} ${m.text}`
-            })),
-            { text: userInput }
-          ]
+      // Build conversation history
+      const contents = [
+        ...history.map(msg => ({
+          role: msg.role === 'model' ? 'model' : 'user',
+          parts: [{ text: msg.text }]
+        })),
+        {
+          role: 'user',
+          parts: [{ text: userInput }]
+        }
+      ];
+
+      const response = await fetch(`${this.apiUrl}?key=${this.apiKey}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-        config: {
-          systemInstruction: SYSTEM_INSTRUCTION,
-          temperature: 0.3, 
-          topP: 0.9,
-        },
+        body: JSON.stringify({
+          contents: contents,
+          generationConfig: {
+            temperature: 0.3,
+            topP: 0.9,
+            maxOutputTokens: 2048,
+          },
+          systemInstruction: {
+            parts: [{ text: SYSTEM_INSTRUCTION }]
+          }
+        })
       });
 
-      return response.text;
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Gemini API Error:', errorData);
+        throw new Error(errorData.error?.message || 'API request failed');
+      }
+
+      const data = await response.json();
+      
+      // Extract text from response
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      
+      if (!text) {
+        throw new Error('No response text from API');
+      }
+      
+      return text;
     } catch (error) {
       console.error("Gemini API Error:", error);
       throw error;
