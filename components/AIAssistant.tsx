@@ -1,309 +1,507 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import { Message } from "../types";
-import { ArrowLeft, Send, Mic, X, AlertCircle } from 'lucide-react';
+import { 
+  Send, 
+  ArrowLeft, 
+  Bot, 
+  User, 
+  Loader2, 
+  Sparkles, 
+  X, 
+  Settings, 
+  Cpu, 
+  Ghost, 
+  Smile, 
+  Zap, 
+  CircuitBoard,
+  Copy,
+  Check,
+  Lightbulb,
+  AlertCircle,
+  Key
+} from 'lucide-react';
 
-interface AIAssistantProps {
-  onBack: () => void;
+interface Message {
+  role: 'user' | 'model';
+  text: string;
 }
 
-export const AIAssistant: React.FC<AIAssistantProps> = ({ onBack }) => {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      role: 'model',
-      text: 'Xin chào! Tôi là trợ lý ảo của UBND Phường Tây Thạnh. Tôi có thể giúp bạn:\n\n• Tra cứu thủ tục hành chính\n• Hướng dẫn nộp hồ sơ trực tuyến\n• Giải đáp chính sách pháp luật\n• Đặt lịch hẹn\n\nBạn cần hỗ trợ gì?'
+interface AvatarOption {
+  id: string;
+  icon: React.ReactNode;
+  color: string;
+  name: string;
+}
+
+type Language = 'vi' | 'en';
+
+const AVATAR_OPTIONS: AvatarOption[] = [
+  { id: 'classic', icon: <Bot size={20} />, color: 'bg-red-500', name: 'Smart Plus' },
+  { id: 'friendly', icon: <Smile size={20} />, color: 'bg-emerald-500', name: 'Thân thiện' },
+  { id: 'smart', icon: <Cpu size={20} />, color: 'bg-blue-500', name: 'Chuyên gia' },
+  { id: 'dynamic', icon: <Zap size={20} />, color: 'bg-amber-500', name: 'Năng động' },
+  { id: 'tech', icon: <CircuitBoard size={20} />, color: 'bg-indigo-500', name: 'Kỹ thuật' },
+  { id: 'ghost', icon: <Ghost size={20} />, color: 'bg-slate-700', name: 'Tối giản' },
+];
+
+const SUGGESTIONS = {
+  vi: [
+    "Thủ tục làm Khai sinh?",
+    "Địa chỉ UBND Phường ở đâu?",
+    "Làm sao để đặt lịch hẹn?",
+    "Phó Giám đốc Trung tâm là ai?",
+    "Phí chứng thực bản sao?"
+  ],
+  en: [
+    "Birth registration process?",
+    "Where is the Ward Office?",
+    "How to book an appointment?",
+    "Who is the Deputy Director?",
+    "Notarization service fees?"
+  ]
+};
+
+const UI_TEXT = {
+  vi: {
+    title: 'Trợ lý',
+    placeholder: 'Nhập câu hỏi của ông/bà...',
+    thinking: 'AI đang xử lý...',
+    welcome: 'Kính chào ông/bà, tôi là Trợ lý AI Smart 4.0 Plus của Phường Tây Thạnh. Tôi có thể giúp gì cho ông/bà hôm nay?',
+    confirm: 'Xác nhận',
+    personalization: 'Cá nhân hóa AI',
+    apiKeyRequired: 'Vui lòng nhập API Key',
+    apiKeyPlaceholder: 'Nhập Gemini API Key của bạn',
+    saveKey: 'Lưu API Key',
+    apiKeyInfo: 'API Key sẽ được lưu trong trình duyệt của bạn',
+    getApiKey: 'Lấy API Key miễn phí tại Google AI Studio'
+  },
+  en: {
+    title: 'Assistant',
+    placeholder: 'Type your question here...',
+    thinking: 'AI is thinking...',
+    welcome: 'Welcome, I am the Smart 4.0 Plus AI Assistant of Tay Thanh Ward. How can I assist you today?',
+    confirm: 'Confirm',
+    personalization: 'AI Personalization',
+    apiKeyRequired: 'Please enter API Key',
+    apiKeyPlaceholder: 'Enter your Gemini API Key',
+    saveKey: 'Save API Key',
+    apiKeyInfo: 'API Key will be saved in your browser',
+    getApiKey: 'Get free API Key at Google AI Studio'
+  }
+};
+
+// Gemini Service
+class GeminiService {
+  private apiKey: string = '';
+  private apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
+
+  setApiKey(key: string) {
+    this.apiKey = key;
+  }
+
+  getApiKey(): string {
+    return this.apiKey;
+  }
+
+  async sendMessage(messages: Message[], currentInput: string): Promise<string> {
+    if (!this.apiKey) {
+      throw new Error('API Key not set');
     }
+
+    const response = await fetch(`${this.apiUrl}?key=${this.apiKey}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{
+            text: this.buildPrompt(messages, currentInput)
+          }]
+        }],
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 1024,
+        }
+      })
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error?.message || 'API request failed');
+    }
+
+    const data = await response.json();
+    return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  }
+
+  private buildPrompt(messages: Message[], currentInput: string): string {
+    const context = `Bạn là trợ lý AI của Phường Tây Thạnh, Quận Tân Phú, TP.HCM. 
+Nhiệm vụ: Hỗ trợ người dân về thủ tục hành chính, thông tin địa phương.
+Phong cách: Lịch sự, chuyên nghiệp, sử dụng "ông/bà" khi xưng hô.`;
+
+    const history = messages.map(m => `${m.role === 'user' ? 'Người dùng' : 'AI'}: ${m.text}`).join('\n');
+    
+    return `${context}\n\n${history}\n\n${currentInput}`;
+  }
+}
+
+const geminiService = new GeminiService();
+
+export default function AIAssistant() {
+  const [lang, setLang] = useState<Language>('vi');
+  const [messages, setMessages] = useState<Message[]>([
+    { role: 'model', text: UI_TEXT['vi'].welcome }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [apiKeyStatus, setApiKeyStatus] = useState<'checking' | 'ok' | 'missing'>('checking');
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [isListening, setIsListening] = useState(false);
+  const [showAvatarPicker, setShowAvatarPicker] = useState(false);
+  const [selectedAvatar, setSelectedAvatar] = useState<AvatarOption>(AVATAR_OPTIONS[0]);
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const [showApiKeyModal, setShowApiKeyModal] = useState(false);
+  const [apiKeyInput, setApiKeyInput] = useState('');
+  const [hasApiKey, setHasApiKey] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
-  const genAI = useRef<GoogleGenerativeAI | null>(null);
-  
   useEffect(() => {
-    // Thử nhiều cách lấy API key
-    let apiKey = '';
-    
-    // Cách 1: Vite env variable (cho production Vercel)
-    if (import.meta.env.VITE_GEMINI_API_KEY) {
-      apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-      console.log('✅ API Key loaded from VITE_GEMINI_API_KEY');
-    }
-    // Cách 2: Process env (backup)
-    else if (typeof process !== 'undefined' && process.env?.GEMINI_API_KEY) {
-      apiKey = process.env.GEMINI_API_KEY;
-      console.log('✅ API Key loaded from GEMINI_API_KEY');
-    }
-    // Cách 3: Hardcoded cho testing (XÓA SAU KHI DEPLOY)
-    else {
-      console.error('❌ No API key found in environment variables');
-      console.log('Available env vars:', Object.keys(import.meta.env));
-    }
-    
-    if (apiKey && apiKey.startsWith('AIza')) {
-      genAI.current = new GoogleGenerativeAI(apiKey);
-      setApiKeyStatus('ok');
-      console.log('✅ Gemini AI initialized successfully');
+    // Check if API key exists in localStorage
+    const savedKey = localStorage.getItem('gemini_api_key');
+    if (savedKey) {
+      geminiService.setApiKey(savedKey);
+      setHasApiKey(true);
     } else {
-      setApiKeyStatus('missing');
-      console.error('❌ Invalid or missing API key');
+      setShowApiKeyModal(true);
     }
   }, []);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages, isLoading]);
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    if (messages.length === 1) {
+      setMessages([{ role: 'model', text: UI_TEXT[lang].welcome }]);
+    }
+  }, [lang]);
 
-  const sendMessage = async () => {
-    if (!input.trim() || isLoading) return;
-    
-    if (apiKeyStatus === 'missing' || !genAI.current) {
-      const errorMsg: Message = {
-        role: 'model',
-        text: '⚠️ Lỗi cấu hình: API key chưa được thiết lập.\n\nVui lòng:\n1. Thêm VITE_GEMINI_API_KEY vào Vercel Environment Variables\n2. Redeploy lại ứng dụng\n\nHoặc liên hệ admin để được hỗ trợ.'
-      };
-      setMessages(prev => [...prev, errorMsg]);
+  const handleSaveApiKey = () => {
+    if (apiKeyInput.trim()) {
+      localStorage.setItem('gemini_api_key', apiKeyInput.trim());
+      geminiService.setApiKey(apiKeyInput.trim());
+      setHasApiKey(true);
+      setShowApiKeyModal(false);
+      setApiKeyInput('');
+    }
+  };
+
+  const handleSend = async (customInput?: string) => {
+    const textToSend = customInput || input;
+    if (!textToSend.trim() || isLoading) return;
+
+    if (!hasApiKey) {
+      setShowApiKeyModal(true);
       return;
     }
 
-    const userMessage: Message = { role: 'user', text: input };
-    setMessages(prev => [...prev, userMessage]);
-    setInput('');
+    const userMsg: Message = { role: 'user', text: textToSend };
+    setMessages(prev => [...prev, userMsg]);
+    if (!customInput) setInput('');
     setIsLoading(true);
 
     try {
-      const model = genAI.current.getGenerativeModel({ 
-        model: "gemini-2.0-flash-exp",
-        systemInstruction: `Bạn là Trợ lý AI Smart 4.0 Plus của UBND Phường Tây Thạnh, Quận Tân Phú, TP.HCM - một trợ lý ảo song ngữ Việt-Anh thông minh và thân thiện.
-
-🎯 NHIỆM VỤ CHÍNH:
-- Hỗ trợ người dân về thủ tục hành chính công 24/7
-- Hướng dẫn nộp hồ sơ trực tuyến, đặt lịch hẹn
-- Giải đáp chính sách, pháp luật địa phương
-- Tra cứu tiến độ giải quyết hồ sơ
-- Cung cấp thông tin về dịch vụ công
-
-📋 CÁC THỦ TỤC PHỔ BIẾN:
-1. Đăng ký khai sinh
-2. Chứng thực bản sao
-3. Đăng ký thường trú/tạm trú
-4. Cấp giấy xác nhận độc thân
-5. Đăng ký kết hôn
-6. Cấp sổ hộ khẩu
-7. Đổi giấy phép lái xe
-
-💡 PHONG CÁCH GIAO TIẾP:
-- Lịch sự, chuyên nghiệp, nhiệt tình
-- Trả lời súc tích, rõ ràng, dễ hiểu
-- Sử dụng emoji phù hợp (📌 📝 ✅ ⏰ 📞)
-- Ưu tiên giải pháp nhanh nhất
-- Luôn song ngữ Việt-Anh nếu người dùng hỏi bằng tiếng Anh
-
-📞 THÔNG TIN LIÊN HỆ:
-- Địa chỉ: 102 Tây Thạnh, P.Tây Thạnh, Q.Tân Phú, TP.HCM
-- Hotline: 028.3815.8989
-- Email: taythanh@tanphu.hochiminhcity.gov.vn
-- Giờ làm việc: 7h30-11h30 & 13h30-17h (T2-T6)
-
-⚠️ LƯU Ý:
-- Nếu không chắc chắn → hướng dẫn liên hệ trực tiếp
-- Luôn đề xuất dịch vụ trực tuyến khi có thể
-- Không yêu cầu thông tin cá nhân nhạy cảm
-- Với câu hỏi phức tạp → gợi ý đặt lịch gặp trực tiếp`
-      });
-
-      const chat = model.startChat({
-        history: messages.slice(1).map(msg => ({
-          role: msg.role === 'user' ? 'user' : 'model',
-          parts: [{ text: msg.text }]
-        }))
-      });
-
-      const result = await chat.sendMessage(input);
-      const response = await result.response;
-      const botMessage: Message = { 
+      const langInstruction = lang === 'en' ? "Please respond in English." : "Hãy phản hồi bằng tiếng Việt.";
+      const reply = await geminiService.sendMessage(messages, `${langInstruction} User input: ${textToSend}`);
+      setMessages(prev => [...prev, { role: 'model', text: reply || (lang === 'vi' ? 'Xin lỗi, tôi gặp sự cố.' : 'Sorry, I encountered an error.') }]);
+    } catch (error) {
+      setMessages(prev => [...prev, { 
         role: 'model', 
-        text: response.text() 
-      };
-      
-      setMessages(prev => [...prev, botMessage]);
-    } catch (error: any) {
-      console.error('❌ Gemini API Error:', error);
-      
-      let errorText = 'Xin lỗi, đã có lỗi xảy ra. ';
-      
-      if (error.message?.includes('API_KEY')) {
-        errorText += 'API key không hợp lệ. Vui lòng kiểm tra cấu hình.';
-      } else if (error.message?.includes('quota')) {
-        errorText += 'Đã vượt giới hạn sử dụng API. Vui lòng thử lại sau.';
-      } else if (error.message?.includes('SAFETY')) {
-        errorText += 'Nội dung không phù hợp. Vui lòng diễn đạt lại câu hỏi.';
-      } else {
-        errorText += `Vui lòng thử lại sau hoặc liên hệ hotline: 028.3815.8989\n\nChi tiết lỗi: ${error.message || 'Unknown error'}`;
-      }
-      
-      const errorMessage: Message = {
-        role: 'model',
-        text: errorText
-      };
-      setMessages(prev => [...prev, errorMessage]);
+        text: lang === 'vi' 
+          ? 'Hệ thống đang bận cập nhật, vui lòng thử lại sau.' 
+          : 'System is busy updating, please try again later.' 
+      }]);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleVoiceInput = () => {
-    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      alert('Trình duyệt của bạn không hỗ trợ nhận dạng giọng nói');
-      return;
-    }
+  const handleCopy = (text: string, index: number) => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopiedIndex(index);
+      setTimeout(() => setCopiedIndex(null), 2000);
+    });
+  };
 
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    const recognition = new SpeechRecognition();
-    recognition.lang = 'vi-VN';
-    recognition.continuous = false;
-    recognition.interimResults = false;
-
-    recognition.onstart = () => {
-      setIsListening(true);
-    };
-
-    recognition.onresult = (event: any) => {
-      const transcript = event.results[0][0].transcript;
-      setInput(transcript);
-      setIsListening(false);
-    };
-
-    recognition.onerror = () => {
-      setIsListening(false);
-      alert('Không thể nhận dạng giọng nói. Vui lòng thử lại.');
-    };
-
-    recognition.onend = () => {
-      setIsListening(false);
-    };
-
-    recognition.start();
+  const formatMessageContent = (text: string) => {
+    return text.split('\n').map((line, index) => {
+      const cleanLine = line.replace(/[*#]/g, '').trim();
+      if (!cleanLine) return <div key={index} className="h-2" />;
+      return <div key={index} className="mb-1 last:mb-0">{cleanLine}</div>;
+    });
   };
 
   return (
-    <div className="h-full bg-white flex flex-col">
+    <div className="flex flex-col h-screen bg-white relative">
       {/* Header */}
-      <div className="sticky top-0 p-5 pt-7 flex justify-between items-center z-30 bg-gradient-to-r from-red-600 to-red-500 text-white shadow-lg">
+      <div className="p-4 border-b flex items-center justify-between bg-red-600 text-white shadow-md z-10">
         <div className="flex items-center gap-3">
-          <button 
-            onClick={onBack} 
-            className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/20 hover:bg-white/30 active:scale-90 transition-all"
-          >
-            <ArrowLeft size={20} />
-          </button>
-          <div>
-            <h1 className="font-black text-lg">Trợ lý AI Smart Plus</h1>
-            <div className="flex items-center gap-2">
-              <div className={`w-2 h-2 rounded-full ${apiKeyStatus === 'ok' ? 'bg-green-400' : apiKeyStatus === 'missing' ? 'bg-red-400' : 'bg-yellow-400'}`}></div>
-              <p className="text-xs text-white/80">
-                {apiKeyStatus === 'ok' ? 'Bilingual AI 4.0+' : apiKeyStatus === 'missing' ? 'Offline' : 'Checking...'}
-              </p>
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => setShowAvatarPicker(true)}
+              className="bg-white p-1.5 rounded-xl text-red-600 shadow-sm relative overflow-hidden group active:scale-95 transition-transform"
+            >
+              <div className={selectedAvatar.color + " p-1 rounded-lg text-white"}>
+                {selectedAvatar.icon}
+              </div>
+            </button>
+            <div>
+              <h3 className="font-bold text-sm">{UI_TEXT[lang].title} {selectedAvatar.name}</h3>
+              <div className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span>
+                <p className="text-[10px] text-white/80 font-bold uppercase tracking-tighter">Bilingual AI v4.0+</p>
+              </div>
             </div>
           </div>
         </div>
-        <div className="flex gap-2">
-          <button className="px-3 py-1.5 bg-white/20 rounded-lg text-xs font-bold hover:bg-white/30">
-            VN
+        
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowApiKeyModal(true)}
+            className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+            title="API Settings"
+          >
+            <Key size={18} />
           </button>
-          <button className="px-3 py-1.5 bg-white/10 rounded-lg text-xs font-bold hover:bg-white/20">
-            EN
-          </button>
+          <div className="flex bg-red-700/50 p-1 rounded-xl border border-white/10">
+            <button 
+              onClick={() => setLang('vi')}
+              className={`px-2.5 py-1 rounded-lg text-[10px] font-black transition-all ${lang === 'vi' ? 'bg-white text-red-600 shadow-sm' : 'text-white/60 hover:text-white'}`}
+            >
+              VN
+            </button>
+            <button 
+              onClick={() => setLang('en')}
+              className={`px-2.5 py-1 rounded-lg text-[10px] font-black transition-all ${lang === 'en' ? 'bg-white text-red-600 shadow-sm' : 'text-white/60 hover:text-white'}`}
+            >
+              EN
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* API Key Warning */}
-      {apiKeyStatus === 'missing' && (
-        <div className="bg-red-50 border-l-4 border-red-500 p-4 m-4">
-          <div className="flex items-start gap-3">
-            <AlertCircle className="text-red-500 mt-0.5" size={20} />
-            <div className="flex-1">
-              <p className="text-sm font-bold text-red-800">Chưa cấu hình API Key</p>
-              <p className="text-xs text-red-600 mt-1">
-                Vui lòng thêm <code className="bg-red-100 px-1 py-0.5 rounded">VITE_GEMINI_API_KEY</code> vào Environment Variables trên Vercel
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-5 space-y-4 bg-slate-50">
-        {messages.map((msg, idx) => (
-          <div
-            key={idx}
-            className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-          >
-            <div
-              className={`max-w-[80%] rounded-2xl px-4 py-3 ${
-                msg.role === 'user'
-                  ? 'bg-red-600 text-white rounded-br-sm'
-                  : 'bg-white text-slate-800 shadow-sm rounded-bl-sm border border-slate-100'
-              }`}
-            >
-              <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.text}</p>
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50 no-scrollbar" ref={scrollRef}>
+        {messages.map((m, i) => (
+          <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-2 duration-300`}>
+            <div className={`max-w-[92%] flex gap-2.5 ${m.role === 'user' ? 'flex-row-reverse' : ''}`}>
+              <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 shadow-sm mt-1 transition-all ${
+                m.role === 'user' ? 'bg-red-500 text-white' : `${selectedAvatar.color} text-white`
+              }`}>
+                {m.role === 'user' ? <User size={16} /> : selectedAvatar.icon}
+              </div>
+              <div className="relative group">
+                <div className={`px-4 py-3 rounded-[20px] text-[14px] leading-[1.6] shadow-sm ${
+                  m.role === 'user' 
+                    ? 'bg-red-600 text-white rounded-tr-none' 
+                    : 'bg-white border border-slate-100 text-slate-700 rounded-tl-none pr-10'
+                }`}>
+                  {formatMessageContent(m.text)}
+                </div>
+                {m.role === 'model' && (
+                  <button 
+                    onClick={() => handleCopy(m.text, i)}
+                    className="absolute top-2 right-2 p-1.5 rounded-lg bg-slate-50 text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
+                  >
+                    {copiedIndex === i ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         ))}
         {isLoading && (
           <div className="flex justify-start">
-            <div className="bg-white rounded-2xl px-4 py-3 shadow-sm border border-slate-100">
-              <div className="flex gap-1">
-                <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"></div>
-                <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce [animation-delay:0.2s]"></div>
-                <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce [animation-delay:0.4s]"></div>
+            <div className="flex gap-2.5 items-start">
+              <div className={`w-8 h-8 rounded-lg ${selectedAvatar.color} text-white flex items-center justify-center shadow-sm mt-1 animate-bounce`}>
+                <Sparkles size={16} />
+              </div>
+              <div className="bg-white border border-red-50 px-4 py-3 rounded-[20px] rounded-tl-none shadow-md flex flex-col gap-2 min-w-[160px] relative overflow-hidden">
+                <div className="flex items-center gap-2">
+                  <div className="flex gap-1">
+                    <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-bounce [animation-duration:0.6s]"></span>
+                    <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-bounce [animation-duration:0.6s] [animation-delay:0.2s]"></span>
+                    <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-bounce [animation-duration:0.6s] [animation-delay:0.4s]"></span>
+                  </div>
+                  <span className="text-[10px] font-black text-red-600 uppercase tracking-widest">{UI_TEXT[lang].thinking}</span>
+                </div>
+                <div className="h-1 w-full bg-slate-100 rounded-full overflow-hidden">
+                  <div className="h-full bg-red-600 w-1/3 rounded-full animate-[loading-slide_1.5s_infinite_ease-in-out]"></div>
+                </div>
               </div>
             </div>
           </div>
         )}
-        <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
-      <div className="p-4 bg-white border-t border-slate-200">
-        <div className="flex gap-2 items-end">
-          <div className="flex-1 relative">
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-              placeholder="Nhập câu hỏi của bạn..."
-              className="w-full px-4 py-3 pr-12 rounded-2xl border-2 border-slate-200 focus:border-red-500 focus:outline-none text-sm"
-              disabled={isLoading}
-            />
-            <button
-              onClick={handleVoiceInput}
-              disabled={isLoading || isListening}
-              className={`absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full transition-all ${
-                isListening 
-                  ? 'bg-red-600 text-white animate-pulse' 
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-              }`}
-            >
-              {isListening ? <X size={18} /> : <Mic size={18} />}
-            </button>
+      {/* Suggestions & Input */}
+      <div className="p-4 border-t bg-white space-y-3">
+        {messages.length < 5 && !isLoading && (
+          <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+            {SUGGESTIONS[lang].map((s, idx) => (
+              <button 
+                key={idx}
+                onClick={() => handleSend(s)}
+                className="flex items-center gap-1.5 px-4 py-2 bg-slate-50 border border-slate-100 rounded-full whitespace-nowrap text-[11px] font-bold text-slate-600 hover:bg-red-50 hover:text-red-600 hover:border-red-100 transition-all active:scale-95"
+              >
+                <Lightbulb size={12} className="text-amber-500" />
+                {s}
+              </button>
+            ))}
           </div>
-          <button
-            onClick={sendMessage}
-            disabled={isLoading || !input.trim() || apiKeyStatus === 'missing'}
-            className="w-12 h-12 bg-red-600 text-white rounded-2xl flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed hover:bg-red-700 active:scale-95 transition-all shadow-lg"
+        )}
+        
+        <div className="flex gap-2 bg-slate-100 p-1.5 rounded-[24px] items-center border border-slate-200/50 focus-within:ring-2 focus-within:ring-red-500/20 focus-within:bg-white transition-all">
+          <input 
+            type="text" 
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+            placeholder={UI_TEXT[lang].placeholder} 
+            className="flex-1 bg-transparent px-4 py-2.5 text-sm focus:outline-none text-slate-700 placeholder:text-slate-400 font-bold"
+          />
+          <button 
+            onClick={() => handleSend()}
+            disabled={isLoading || !input.trim()}
+            className="w-10 h-10 bg-red-600 text-white rounded-full flex items-center justify-center hover:bg-red-700 transition-all disabled:opacity-40 shadow-md shadow-red-600/20 active:scale-90"
           >
-            <Send size={20} />
+            {isLoading ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} fill="currentColor" />}
           </button>
         </div>
       </div>
+
+      {/* API Key Modal */}
+      {showApiKeyModal && (
+        <div className="absolute inset-0 z-[100] animate-in fade-in duration-300">
+          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => hasApiKey && setShowApiKeyModal(false)}></div>
+          <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-[32px] p-6 shadow-2xl animate-in slide-in-from-bottom duration-500">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-2">
+                <Key className="text-red-600" size={24} />
+                <h4 className="text-lg font-black text-slate-900 tracking-tight">Gemini API Key</h4>
+              </div>
+              {hasApiKey && (
+                <button onClick={() => setShowApiKeyModal(false)} className="w-10 h-10 flex items-center justify-center bg-slate-100 rounded-full text-slate-500">
+                  <X size={20} />
+                </button>
+              )}
+            </div>
+
+            <div className="space-y-4">
+              <div className="bg-blue-50 border border-blue-100 p-4 rounded-2xl flex items-start gap-3">
+                <AlertCircle className="text-blue-600 shrink-0 mt-0.5" size={20} />
+                <div>
+                  <p className="text-[12px] font-bold text-blue-900 mb-1">
+                    {UI_TEXT[lang].getApiKey}
+                  </p>
+                  <a 
+                    href="https://aistudio.google.com/apikey" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-[11px] text-blue-600 underline font-bold"
+                  >
+                    https://aistudio.google.com/apikey
+                  </a>
+                </div>
+              </div>
+
+              <input
+                type="password"
+                value={apiKeyInput}
+                onChange={(e) => setApiKeyInput(e.target.value)}
+                placeholder={UI_TEXT[lang].apiKeyPlaceholder}
+                className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-red-500 focus:outline-none text-sm font-medium"
+                onKeyDown={(e) => e.key === 'Enter' && handleSaveApiKey()}
+              />
+
+              <p className="text-[11px] text-slate-500 italic">
+                {UI_TEXT[lang].apiKeyInfo}
+              </p>
+
+              <button
+                onClick={handleSaveApiKey}
+                disabled={!apiKeyInput.trim()}
+                className="w-full h-14 bg-red-600 text-white rounded-2xl font-bold text-sm shadow-xl shadow-red-600/20 active:scale-[0.98] transition-all uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {UI_TEXT[lang].saveKey}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Avatar Picker Modal */}
+      {showAvatarPicker && (
+        <div className="absolute inset-0 z-[100] animate-in fade-in duration-300">
+          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setShowAvatarPicker(false)}></div>
+          <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-[32px] p-6 shadow-2xl animate-in slide-in-from-bottom duration-500">
+            <div className="flex items-center justify-between mb-6">
+              <h4 className="text-lg font-black text-slate-900 tracking-tight">{UI_TEXT[lang].personalization}</h4>
+              <button onClick={() => setShowAvatarPicker(false)} className="w-10 h-10 flex items-center justify-center bg-slate-100 rounded-full text-slate-500">
+                <X size={20} />
+              </button>
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              {AVATAR_OPTIONS.map((opt) => (
+                <button 
+                  key={opt.id}
+                  onClick={() => {
+                    setSelectedAvatar(opt);
+                    setShowAvatarPicker(false);
+                  }}
+                  className={`flex flex-col items-center gap-2 p-3 rounded-2xl transition-all border-2 ${
+                    selectedAvatar.id === opt.id 
+                      ? 'border-red-600 bg-red-50 scale-105' 
+                      : 'border-slate-50 bg-slate-50 hover:bg-slate-100'
+                  }`}
+                >
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white shadow-sm ${opt.color}`}>
+                    {opt.icon}
+                  </div>
+                  <span className={`text-[10px] font-black uppercase tracking-tight ${
+                    selectedAvatar.id === opt.id ? 'text-red-600' : 'text-slate-500'
+                  }`}>
+                    {opt.name}
+                  </span>
+                </button>
+              ))}
+            </div>
+            <div className="mt-8 space-y-4">
+              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                 <p className="text-[11px] font-bold text-slate-500 leading-relaxed italic">
+                   {lang === 'vi' 
+                     ? '"Tất cả câu trả lời tuân thủ quy định hành chính hiện hành tại Phường Tây Thạnh."'
+                     : '"All responses comply with current administrative regulations in Tay Thanh Ward."'}
+                 </p>
+              </div>
+              <button 
+                onClick={() => setShowAvatarPicker(false)}
+                className="w-full h-14 bg-red-600 text-white rounded-2xl font-bold text-sm shadow-xl shadow-red-600/20 active:scale-[0.98] transition-all uppercase tracking-widest"
+              >
+                {UI_TEXT[lang].confirm}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <style>{`
+        @keyframes loading-slide {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(300%); }
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none !important; }
+        .no-scrollbar { -ms-overflow-style: none !important; scrollbar-width: none !important; }
+      `}</style>
     </div>
   );
-};
+}
