@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Message } from '../types';
 import { geminiService } from '../services/geminiService';
@@ -19,7 +18,8 @@ import {
   Copy,
   Check,
   Lightbulb,
-  Globe
+  Globe,
+  AlertCircle
 } from 'lucide-react';
 
 interface AIAssistantProps {
@@ -68,7 +68,8 @@ const UI_TEXT = {
     thinking: 'AI đang xử lý...',
     welcome: 'Kính chào ông/bà, tôi là Trợ lý AI Smart 4.0 Plus của Phường Tây Thạnh. Tôi có thể giúp gì cho ông/bà hôm nay?',
     confirm: 'Xác nhận',
-    personalization: 'Cá nhân hóa AI'
+    personalization: 'Cá nhân hóa AI',
+    apiError: '⚠️ API Key chưa được cấu hình. Vui lòng kiểm tra file .env và đảm bảo VITE_GEMINI_API_KEY đã được thiết lập.'
   },
   en: {
     title: 'Assistant',
@@ -76,7 +77,8 @@ const UI_TEXT = {
     thinking: 'AI is thinking...',
     welcome: 'Welcome, I am the Smart 4.0 Plus AI Assistant of Tay Thanh Ward. How can I assist you today?',
     confirm: 'Confirm',
-    personalization: 'AI Personalization'
+    personalization: 'AI Personalization',
+    apiError: '⚠️ API Key not configured. Please check your .env file and ensure VITE_GEMINI_API_KEY is set.'
   }
 };
 
@@ -90,7 +92,15 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ onBack }) => {
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const [selectedAvatar, setSelectedAvatar] = useState<AvatarOption>(AVATAR_OPTIONS[0]);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const [apiKeyError, setApiKeyError] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Kiểm tra API key khi component mount
+    if (!geminiService.isInitialized()) {
+      setApiKeyError(true);
+    }
+  }, []);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -109,6 +119,15 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ onBack }) => {
     const textToSend = customInput || input;
     if (!textToSend.trim() || isLoading) return;
 
+    // Kiểm tra API key trước khi gửi
+    if (!geminiService.isInitialized()) {
+      setMessages(prev => [...prev, { 
+        role: 'model', 
+        text: UI_TEXT[lang].apiError
+      }]);
+      return;
+    }
+
     const userMsg: Message = { role: 'user', text: textToSend };
     setMessages(prev => [...prev, userMsg]);
     if (!customInput) setInput('');
@@ -120,6 +139,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ onBack }) => {
       const reply = await geminiService.sendMessage(messages, `${langInstruction} User input: ${textToSend}`);
       setMessages(prev => [...prev, { role: 'model', text: reply || (lang === 'vi' ? 'Xin lỗi, tôi gặp sự cố.' : 'Sorry, I encountered an error.') }]);
     } catch (error) {
+      console.error('AI Error:', error);
       setMessages(prev => [...prev, { 
         role: 'model', 
         text: lang === 'vi' 
@@ -166,8 +186,17 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ onBack }) => {
             <div>
               <h3 className="font-bold text-sm">{UI_TEXT[lang].title} {selectedAvatar.name}</h3>
               <div className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span>
-                <p className="text-[10px] text-white/80 font-bold uppercase tracking-tighter">Bilingual AI v4.0+</p>
+                {apiKeyError ? (
+                  <>
+                    <AlertCircle size={12} className="text-amber-400" />
+                    <p className="text-[10px] text-amber-200 font-bold uppercase tracking-tighter">Config Required</p>
+                  </>
+                ) : (
+                  <>
+                    <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span>
+                    <p className="text-[10px] text-white/80 font-bold uppercase tracking-tighter">Bilingual AI v4.0+</p>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -189,6 +218,16 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ onBack }) => {
           </button>
         </div>
       </div>
+
+      {/* API Key Warning Banner */}
+      {apiKeyError && (
+        <div className="bg-amber-50 border-b border-amber-200 p-3 flex items-start gap-2">
+          <AlertCircle size={16} className="text-amber-600 mt-0.5 shrink-0" />
+          <p className="text-xs text-amber-800 leading-relaxed">
+            <strong>Cấu hình thiếu:</strong> Tạo file <code className="bg-amber-100 px-1 py-0.5 rounded">.env</code> và thêm <code className="bg-amber-100 px-1 py-0.5 rounded">VITE_GEMINI_API_KEY=your_api_key_here</code>
+          </p>
+        </div>
+      )}
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50 no-scrollbar" ref={scrollRef}>
