@@ -1,5 +1,4 @@
-
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { Message } from "../types";
 
 const SYSTEM_INSTRUCTION = `BẠN LÀ "TRỢ LÝ AI SMART 4.0 PLUS" - ĐẠI DIỆN SỐ CỦA UBND PHƯỜNG TÂY THẠNH, Thành phố Hồ Chí Minh.
@@ -10,7 +9,6 @@ NGÔN NGỮ & XƯNG HÔ:
 - Phong cách: Tận tâm, chi tiết, chuyên nghiệp. Sử dụng EMOJI để làm nổi bật các ý quan trọng.
 
 QUY TẮC PHẢN HỒI CHI TIẾT (SỬ DỤNG ICON):
-
 1. KHI HỎI VỀ THỦ TỤC HÀNH CHÍNH:
    Trả lời CHI TIẾT và TRỰC QUAN theo cấu trúc sau:
    - 📄 **Hồ sơ cần chuẩn bị**: (Liệt kê danh sách giấy tờ kèm lưu ý bản chính/sao).
@@ -39,35 +37,64 @@ MỤC TIÊU:
 Phản hồi đầy đủ, dễ hiểu, tạo cảm giác an tâm và hiện đại cho người dân thông qua các biểu tượng trực quan về Tốc độ và Bảo mật.`;
 
 export class GeminiService {
-  private ai: GoogleGenAI;
+  private genAI: GoogleGenerativeAI;
+  private model: any;
 
   constructor() {
-    this.ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+    const apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY;
+    
+    if (!apiKey) {
+      throw new Error('⚠️ Thiếu API key! Vui lòng cấu hình GEMINI_API_KEY trong .env');
+    }
+
+    this.genAI = new GoogleGenerativeAI(apiKey);
+    
+    // Khởi tạo model với system instruction
+    this.model = this.genAI.getGenerativeModel({
+      model: "gemini-2.0-flash-exp", // Hoặc "gemini-1.5-flash"
+      systemInstruction: SYSTEM_INSTRUCTION,
+      generationConfig: {
+        temperature: 0.3,
+        topP: 0.9,
+        maxOutputTokens: 2048,
+      },
+    });
   }
 
-  async sendMessage(history: Message[], userInput: string) {
+  async sendMessage(history: Message[], userInput: string): Promise<string> {
     try {
-      const response = await this.ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: {
-          parts: [
-            ...history.map(m => ({
-              text: `${m.role === 'model' ? 'Assistant:' : 'User:'} ${m.text}`
-            })),
-            { text: userInput }
-          ]
-        },
-        config: {
-          systemInstruction: SYSTEM_INSTRUCTION,
-          temperature: 0.3, 
-          topP: 0.9,
-        },
+      // Chuyển đổi history sang format của Gemini
+      const chatHistory = history.map(msg => ({
+        role: msg.role === 'model' ? 'model' : 'user',
+        parts: [{ text: msg.text }]
+      }));
+
+      // Tạo chat session với lịch sử
+      const chat = this.model.startChat({
+        history: chatHistory,
       });
 
-      return response.text;
-    } catch (error) {
-      console.error("Gemini API Error:", error);
-      throw error;
+      // Gửi tin nhắn mới
+      const result = await chat.sendMessage(userInput);
+      const response = await result.response;
+      
+      return response.text();
+      
+    } catch (error: any) {
+      console.error("❌ Gemini API Error:", error);
+      
+      // Xử lý các lỗi phổ biến
+      if (error.message?.includes('API key')) {
+        throw new Error('🔑 API key không hợp lệ hoặc đã hết hạn');
+      }
+      if (error.message?.includes('quota')) {
+        throw new Error('⚠️ Đã vượt quá giới hạn API. Vui lòng thử lại sau');
+      }
+      if (error.message?.includes('SAFETY')) {
+        throw new Error('🛡️ Nội dung vi phạm chính sách an toàn của Gemini');
+      }
+      
+      throw new Error(`Lỗi không xác định: ${error.message}`);
     }
   }
 }
