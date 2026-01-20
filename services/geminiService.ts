@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from "@google/generative-ai"; // ✅ ĐÚNG
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { Message } from "../types";
 
 const SYSTEM_INSTRUCTION = `BẠN LÀ "TRỢ LÝ AI SMART 4.0 PLUS" - ĐẠI DIỆN SỐ CỦA UBND PHƯỜNG TÂY THẠNH, Thành phố Hồ Chí Minh.
@@ -42,18 +42,26 @@ export class GeminiService {
   private model: any = null;
 
   constructor() {
-    // Khởi tạo với API key từ localStorage nếu có
-    this.initializeWithStoredKey();
+    // Khởi tạo với API key từ biến môi trường
+    this.initializeWithEnvKey();
   }
 
-  private initializeWithStoredKey() {
-    const savedKey = localStorage.getItem('gemini_api_key');
-    if (savedKey) {
-      this.setApiKey(savedKey);
+  private initializeWithEnvKey() {
+    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    
+    if (!apiKey) {
+      console.warn('⚠️ VITE_GEMINI_API_KEY chưa được thiết lập trong file .env');
+      return;
     }
+
+    this.setApiKey(apiKey);
   }
 
   setApiKey(apiKey: string) {
+    if (!apiKey) {
+      throw new Error('API Key không được để trống');
+    }
+
     this.genAI = new GoogleGenerativeAI(apiKey);
     this.model = this.genAI.getGenerativeModel({
       model: "gemini-1.5-flash",
@@ -67,12 +75,16 @@ export class GeminiService {
   }
 
   getApiKey(): string {
-    return localStorage.getItem('gemini_api_key') || '';
+    return import.meta.env.VITE_GEMINI_API_KEY || '';
+  }
+
+  isInitialized(): boolean {
+    return this.model !== null;
   }
 
   async sendMessage(history: Message[], userInput: string): Promise<string> {
     if (!this.model) {
-      throw new Error('API Key chưa được thiết lập');
+      throw new Error('API Key chưa được thiết lập. Vui lòng kiểm tra biến môi trường VITE_GEMINI_API_KEY');
     }
 
     try {
