@@ -29,9 +29,7 @@ import {
   Sparkles,
   ShieldCheck,
   Trophy,
-  CalendarCheck,
-  Handshake,
-  Lock
+  CalendarCheck
 } from 'lucide-react';
 
 export interface NewsItem {
@@ -189,7 +187,7 @@ const App: React.FC = () => {
 
   const renderWelcome = () => (
     <div className="flex flex-col h-full bg-white overflow-hidden animate-in fade-in duration-500">
-      <div className="relative h-[40%] shrink-0 overflow-hidden">
+      <div className="relative h-[42%] shrink-0 overflow-hidden">
         <img src="https://iwater.vn/Image/Picture/New/UBND-phuong-tay-thanh-tan-phu.jpg" alt="UBND Phường Tây Thạnh" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-white via-white/10 to-transparent"></div>
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-4 w-full px-6">
@@ -198,7 +196,7 @@ const App: React.FC = () => {
            </div>
         </div>
       </div>
-      <div className="flex-1 px-8 sm:px-12 flex flex-col items-center text-center -mt-8 relative z-10 justify-center">
+      <div className="flex-1 px-8 sm:px-12 flex flex-col items-center text-center -mt-10 relative z-10 justify-center">
         <div className="space-y-4 mb-8 sm:mb-10 w-full">
           <div className="flex items-center justify-center gap-3 mb-1">
             <span className="h-[1px] w-8 bg-slate-200"></span>
@@ -207,13 +205,13 @@ const App: React.FC = () => {
           </div>
           <h1 className="text-xl sm:text-2xl font-black text-red-700 leading-[1.3] tracking-tight w-full max-w-[420px] mx-auto">
             <span className="block whitespace-nowrap">Trung tâm Phục vụ Hành chính công</span>
-            <span className="block mt-1 text-red-600">Phường Tây Thạnh Smart 4.0</span>
+            <span className="block mt-1">Phường Tây Thạnh Smart 4.0</span>
           </h1>
           <p className="text-[13px] sm:text-[14px] text-slate-500 font-medium leading-relaxed max-w-[300px] mx-auto opacity-80">
             Hệ thống thông minh, minh bạch và hiệu quả phục vụ Nhân dân Thành phố Hồ Chí Minh.
           </p>
         </div>
-        <div className="w-full space-y-3.5 mb-6 max-w-sm">
+        <div className="w-full space-y-3.5 mb-8 max-w-sm">
           <button onClick={() => setCurrentScreen(AppState.LANDING)} className="w-full h-14 sm:h-16 bg-red-600 text-white rounded-2xl font-bold text-base shadow-2xl shadow-red-600/20 flex items-center justify-center gap-3 active:scale-[0.97] transition-all group">
             <span>Bắt đầu trải nghiệm</span>
             <ArrowRight size={20} className="group-hover:translate-x-1.5 transition-transform" />
@@ -222,28 +220,6 @@ const App: React.FC = () => {
             <Bot size={20} className="text-red-600" />
             <span>Hỏi Trợ lý ảo AI ngay</span>
           </button>
-        </div>
-        
-        {/* Cam kết Icon Dịch vụ */}
-        <div className="flex items-center justify-center gap-8 pt-2 animate-in fade-in slide-in-from-bottom-2 duration-700 delay-300">
-          <div className="flex flex-col items-center gap-1.5 group">
-            <div className="w-10 h-10 bg-red-50 rounded-full flex items-center justify-center text-red-600 group-hover:scale-110 transition-transform">
-              <ShieldCheck size={20} />
-            </div>
-            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Bảo mật</span>
-          </div>
-          <div className="flex flex-col items-center gap-1.5 group">
-            <div className="w-10 h-10 bg-red-50 rounded-full flex items-center justify-center text-red-600 group-hover:scale-110 transition-transform">
-              <Zap size={20} />
-            </div>
-            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Tốc độ</span>
-          </div>
-          <div className="flex flex-col items-center gap-1.5 group">
-            <div className="w-10 h-10 bg-red-50 rounded-full flex items-center justify-center text-red-600 group-hover:scale-110 transition-transform">
-              <Handshake size={20} />
-            </div>
-            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Tin cậy</span>
-          </div>
         </div>
       </div>
       <div className="pb-6 text-center shrink-0 opacity-30"><p className="text-[9px] font-bold text-slate-500 uppercase tracking-[0.2em]">Phiên bản 4.0.2 - 2026</p></div>
