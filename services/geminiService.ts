@@ -1,3 +1,4 @@
+import { GoogleGenerativeAI } from "@google/generative-ai"; // ✅ ĐÚNG
 import { Message } from "../types";
 
 const SYSTEM_INSTRUCTION = `BẠN LÀ "TRỢ LÝ AI SMART 4.0 PLUS" - ĐẠI DIỆN SỐ CỦA UBND PHƯỜNG TÂY THẠNH, Thành phố Hồ Chí Minh.
@@ -37,69 +38,55 @@ MỤC TIÊU:
 Phản hồi đầy đủ, dễ hiểu, tạo cảm giác an tâm và hiện đại cho người dân thông qua các biểu tượng trực quan về Tốc độ và Bảo mật.`;
 
 export class GeminiService {
-  private apiKey: string = '';
-  private apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent';
+  private genAI: GoogleGenerativeAI | null = null;
+  private model: any = null;
 
-  setApiKey(key: string) {
-    this.apiKey = key;
+  constructor() {
+    // Khởi tạo với API key từ localStorage nếu có
+    this.initializeWithStoredKey();
+  }
+
+  private initializeWithStoredKey() {
+    const savedKey = localStorage.getItem('gemini_api_key');
+    if (savedKey) {
+      this.setApiKey(savedKey);
+    }
+  }
+
+  setApiKey(apiKey: string) {
+    this.genAI = new GoogleGenerativeAI(apiKey);
+    this.model = this.genAI.getGenerativeModel({
+      model: "gemini-1.5-flash",
+      systemInstruction: SYSTEM_INSTRUCTION,
+      generationConfig: {
+        temperature: 0.3,
+        topP: 0.9,
+        maxOutputTokens: 2048,
+      }
+    });
   }
 
   getApiKey(): string {
-    return this.apiKey;
+    return localStorage.getItem('gemini_api_key') || '';
   }
 
   async sendMessage(history: Message[], userInput: string): Promise<string> {
-    if (!this.apiKey) {
-      throw new Error('API Key not set');
+    if (!this.model) {
+      throw new Error('API Key chưa được thiết lập');
     }
 
     try {
-      // Build conversation history
-      const contents = [
-        ...history.map(msg => ({
+      // Tạo chat với history
+      const chat = this.model.startChat({
+        history: history.map(msg => ({
           role: msg.role === 'model' ? 'model' : 'user',
           parts: [{ text: msg.text }]
-        })),
-        {
-          role: 'user',
-          parts: [{ text: userInput }]
-        }
-      ];
-
-      const response = await fetch(`${this.apiUrl}?key=${this.apiKey}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: contents,
-          generationConfig: {
-            temperature: 0.3,
-            topP: 0.9,
-            maxOutputTokens: 2048,
-          },
-          systemInstruction: {
-            parts: [{ text: SYSTEM_INSTRUCTION }]
-          }
-        })
+        }))
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Gemini API Error:', errorData);
-        throw new Error(errorData.error?.message || 'API request failed');
-      }
-
-      const data = await response.json();
-      
-      // Extract text from response
-      const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-      
-      if (!text) {
-        throw new Error('No response text from API');
-      }
-      
-      return text;
+      const result = await chat.sendMessage(userInput);
+      const response = await result.response;
+      return response.text();
     } catch (error) {
       console.error("Gemini API Error:", error);
       throw error;
