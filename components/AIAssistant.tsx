@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Message } from '../types';
 import { geminiService } from '../services/geminiService';
@@ -9,6 +10,7 @@ import {
   Loader2, 
   Sparkles, 
   X, 
+  Settings, 
   Cpu, 
   Ghost, 
   Smile, 
@@ -17,8 +19,7 @@ import {
   Copy,
   Check,
   Lightbulb,
-  AlertCircle,
-  Key
+  Globe
 } from 'lucide-react';
 
 interface AIAssistantProps {
@@ -67,12 +68,7 @@ const UI_TEXT = {
     thinking: 'AI đang xử lý...',
     welcome: 'Kính chào ông/bà, tôi là Trợ lý AI Smart 4.0 Plus của Phường Tây Thạnh. Tôi có thể giúp gì cho ông/bà hôm nay?',
     confirm: 'Xác nhận',
-    personalization: 'Cá nhân hóa AI',
-    apiKeyRequired: 'Vui lòng nhập API Key',
-    apiKeyPlaceholder: 'Nhập Gemini API Key của bạn',
-    saveKey: 'Lưu API Key',
-    apiKeyInfo: 'API Key sẽ được lưu trong trình duyệt của bạn',
-    getApiKey: 'Lấy API Key miễn phí tại Google AI Studio'
+    personalization: 'Cá nhân hóa AI'
   },
   en: {
     title: 'Assistant',
@@ -80,12 +76,7 @@ const UI_TEXT = {
     thinking: 'AI is thinking...',
     welcome: 'Welcome, I am the Smart 4.0 Plus AI Assistant of Tay Thanh Ward. How can I assist you today?',
     confirm: 'Confirm',
-    personalization: 'AI Personalization',
-    apiKeyRequired: 'Please enter API Key',
-    apiKeyPlaceholder: 'Enter your Gemini API Key',
-    saveKey: 'Save API Key',
-    apiKeyInfo: 'API Key will be saved in your browser',
-    getApiKey: 'Get free API Key at Google AI Studio'
+    personalization: 'AI Personalization'
   }
 };
 
@@ -99,21 +90,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ onBack }) => {
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const [selectedAvatar, setSelectedAvatar] = useState<AvatarOption>(AVATAR_OPTIONS[0]);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
-  const [showApiKeyModal, setShowApiKeyModal] = useState(false);
-  const [apiKeyInput, setApiKeyInput] = useState('');
-  const [hasApiKey, setHasApiKey] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    // Check if API key exists in localStorage
-    const savedKey = localStorage.getItem('gemini_api_key');
-    if (savedKey) {
-      geminiService.setApiKey(savedKey);
-      setHasApiKey(true);
-    } else {
-      setShowApiKeyModal(true);
-    }
-  }, []);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -121,30 +98,16 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ onBack }) => {
     }
   }, [messages, isLoading]);
 
+  // Update welcome message when language changes if no conversation started
   useEffect(() => {
     if (messages.length === 1) {
       setMessages([{ role: 'model', text: UI_TEXT[lang].welcome }]);
     }
   }, [lang]);
 
-  const handleSaveApiKey = () => {
-    if (apiKeyInput.trim()) {
-      localStorage.setItem('gemini_api_key', apiKeyInput.trim());
-      geminiService.setApiKey(apiKeyInput.trim());
-      setHasApiKey(true);
-      setShowApiKeyModal(false);
-      setApiKeyInput('');
-    }
-  };
-
   const handleSend = async (customInput?: string) => {
     const textToSend = customInput || input;
     if (!textToSend.trim() || isLoading) return;
-
-    if (!hasApiKey) {
-      setShowApiKeyModal(true);
-      return;
-    }
 
     const userMsg: Message = { role: 'user', text: textToSend };
     setMessages(prev => [...prev, userMsg]);
@@ -152,12 +115,10 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ onBack }) => {
     setIsLoading(true);
 
     try {
+      // Pass the selected language to the service to guide the AI
       const langInstruction = lang === 'en' ? "Please respond in English." : "Hãy phản hồi bằng tiếng Việt.";
-      const reply = await geminiService.sendMessage(messages, `${langInstruction} ${textToSend}`);
-      setMessages(prev => [...prev, { 
-        role: 'model', 
-        text: reply || (lang === 'vi' ? 'Xin lỗi, tôi gặp sự cố.' : 'Sorry, I encountered an error.') 
-      }]);
+      const reply = await geminiService.sendMessage(messages, `${langInstruction} User input: ${textToSend}`);
+      setMessages(prev => [...prev, { role: 'model', text: reply || (lang === 'vi' ? 'Xin lỗi, tôi gặp sự cố.' : 'Sorry, I encountered an error.') }]);
     } catch (error) {
       setMessages(prev => [...prev, { 
         role: 'model', 
@@ -212,28 +173,20 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ onBack }) => {
           </div>
         </div>
         
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setShowApiKeyModal(true)}
-            className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-            title="API Settings"
+        {/* Language Switcher */}
+        <div className="flex bg-red-700/50 p-1 rounded-xl border border-white/10">
+          <button 
+            onClick={() => setLang('vi')}
+            className={`px-2.5 py-1 rounded-lg text-[10px] font-black transition-all ${lang === 'vi' ? 'bg-white text-red-600 shadow-sm' : 'text-white/60 hover:text-white'}`}
           >
-            <Key size={18} />
+            VN
           </button>
-          <div className="flex bg-red-700/50 p-1 rounded-xl border border-white/10">
-            <button 
-              onClick={() => setLang('vi')}
-              className={`px-2.5 py-1 rounded-lg text-[10px] font-black transition-all ${lang === 'vi' ? 'bg-white text-red-600 shadow-sm' : 'text-white/60 hover:text-white'}`}
-            >
-              VN
-            </button>
-            <button 
-              onClick={() => setLang('en')}
-              className={`px-2.5 py-1 rounded-lg text-[10px] font-black transition-all ${lang === 'en' ? 'bg-white text-red-600 shadow-sm' : 'text-white/60 hover:text-white'}`}
-            >
-              EN
-            </button>
-          </div>
+          <button 
+            onClick={() => setLang('en')}
+            className={`px-2.5 py-1 rounded-lg text-[10px] font-black transition-all ${lang === 'en' ? 'bg-white text-red-600 shadow-sm' : 'text-white/60 hover:text-white'}`}
+          >
+            EN
+          </button>
         </div>
       </div>
 
@@ -326,66 +279,6 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ onBack }) => {
           </button>
         </div>
       </div>
-
-      {/* API Key Modal */}
-      {showApiKeyModal && (
-        <div className="absolute inset-0 z-[100] animate-in fade-in duration-300">
-          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => hasApiKey && setShowApiKeyModal(false)}></div>
-          <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-[32px] p-6 shadow-2xl animate-in slide-in-from-bottom duration-500">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-2">
-                <Key className="text-red-600" size={24} />
-                <h4 className="text-lg font-black text-slate-900 tracking-tight">Gemini API Key</h4>
-              </div>
-              {hasApiKey && (
-                <button onClick={() => setShowApiKeyModal(false)} className="w-10 h-10 flex items-center justify-center bg-slate-100 rounded-full text-slate-500">
-                  <X size={20} />
-                </button>
-              )}
-            </div>
-
-            <div className="space-y-4">
-              <div className="bg-blue-50 border border-blue-100 p-4 rounded-2xl flex items-start gap-3">
-                <AlertCircle className="text-blue-600 shrink-0 mt-0.5" size={20} />
-                <div>
-                  <p className="text-[12px] font-bold text-blue-900 mb-1">
-                    {UI_TEXT[lang].getApiKey}
-                  </p>
-                  <a 
-                    href="https://aistudio.google.com/apikey" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-[11px] text-blue-600 underline font-bold"
-                  >
-                    https://aistudio.google.com/apikey
-                  </a>
-                </div>
-              </div>
-
-              <input
-                type="password"
-                value={apiKeyInput}
-                onChange={(e) => setApiKeyInput(e.target.value)}
-                placeholder={UI_TEXT[lang].apiKeyPlaceholder}
-                className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-red-500 focus:outline-none text-sm font-medium"
-                onKeyDown={(e) => e.key === 'Enter' && handleSaveApiKey()}
-              />
-
-              <p className="text-[11px] text-slate-500 italic">
-                {UI_TEXT[lang].apiKeyInfo}
-              </p>
-
-              <button
-                onClick={handleSaveApiKey}
-                disabled={!apiKeyInput.trim()}
-                className="w-full h-14 bg-red-600 text-white rounded-2xl font-bold text-sm shadow-xl shadow-red-600/20 active:scale-[0.98] transition-all uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {UI_TEXT[lang].saveKey}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Avatar Picker Modal */}
       {showAvatarPicker && (
