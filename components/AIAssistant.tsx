@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { Message } from '../types';
+import { geminiService } from '../services/geminiService';
 import { 
   Send, 
   ArrowLeft, 
@@ -7,7 +9,6 @@ import {
   Loader2, 
   Sparkles, 
   X, 
-  Settings, 
   Cpu, 
   Ghost, 
   Smile, 
@@ -20,9 +21,8 @@ import {
   Key
 } from 'lucide-react';
 
-interface Message {
-  role: 'user' | 'model';
-  text: string;
+interface AIAssistantProps {
+  onBack: () => void;
 }
 
 interface AvatarOption {
@@ -89,65 +89,7 @@ const UI_TEXT = {
   }
 };
 
-// Gemini Service
-class GeminiService {
-  private apiKey: string = '';
-  private apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
-
-  setApiKey(key: string) {
-    this.apiKey = key;
-  }
-
-  getApiKey(): string {
-    return this.apiKey;
-  }
-
-  async sendMessage(messages: Message[], currentInput: string): Promise<string> {
-    if (!this.apiKey) {
-      throw new Error('API Key not set');
-    }
-
-    const response = await fetch(`${this.apiUrl}?key=${this.apiKey}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{
-            text: this.buildPrompt(messages, currentInput)
-          }]
-        }],
-        generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 1024,
-        }
-      })
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error?.message || 'API request failed');
-    }
-
-    const data = await response.json();
-    return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-  }
-
-  private buildPrompt(messages: Message[], currentInput: string): string {
-    const context = `Bạn là trợ lý AI của Phường Tây Thạnh, Quận Tân Phú, TP.HCM. 
-Nhiệm vụ: Hỗ trợ người dân về thủ tục hành chính, thông tin địa phương.
-Phong cách: Lịch sự, chuyên nghiệp, sử dụng "ông/bà" khi xưng hô.`;
-
-    const history = messages.map(m => `${m.role === 'user' ? 'Người dùng' : 'AI'}: ${m.text}`).join('\n');
-    
-    return `${context}\n\n${history}\n\n${currentInput}`;
-  }
-}
-
-const geminiService = new GeminiService();
-
-export default function AIAssistant() {
+export const AIAssistant: React.FC<AIAssistantProps> = ({ onBack }) => {
   const [lang, setLang] = useState<Language>('vi');
   const [messages, setMessages] = useState<Message[]>([
     { role: 'model', text: UI_TEXT['vi'].welcome }
@@ -211,8 +153,11 @@ export default function AIAssistant() {
 
     try {
       const langInstruction = lang === 'en' ? "Please respond in English." : "Hãy phản hồi bằng tiếng Việt.";
-      const reply = await geminiService.sendMessage(messages, `${langInstruction} User input: ${textToSend}`);
-      setMessages(prev => [...prev, { role: 'model', text: reply || (lang === 'vi' ? 'Xin lỗi, tôi gặp sự cố.' : 'Sorry, I encountered an error.') }]);
+      const reply = await geminiService.sendMessage(messages, `${langInstruction} ${textToSend}`);
+      setMessages(prev => [...prev, { 
+        role: 'model', 
+        text: reply || (lang === 'vi' ? 'Xin lỗi, tôi gặp sự cố.' : 'Sorry, I encountered an error.') 
+      }]);
     } catch (error) {
       setMessages(prev => [...prev, { 
         role: 'model', 
@@ -241,10 +186,13 @@ export default function AIAssistant() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-white relative">
+    <div className="flex flex-col h-full bg-white relative">
       {/* Header */}
       <div className="p-4 border-b flex items-center justify-between bg-red-600 text-white shadow-md z-10">
         <div className="flex items-center gap-3">
+          <button onClick={onBack} className="p-1 hover:bg-white/10 rounded-full transition-colors">
+            <ArrowLeft size={24} />
+          </button>
           <div className="flex items-center gap-2">
             <button 
               onClick={() => setShowAvatarPicker(true)}
@@ -504,4 +452,4 @@ export default function AIAssistant() {
       `}</style>
     </div>
   );
-}
+};
