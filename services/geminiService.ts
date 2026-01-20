@@ -1,3 +1,5 @@
+
+import { GoogleGenAI } from "@google/genai";
 import { Message } from "../types";
 
 const SYSTEM_INSTRUCTION = `BẠN LÀ "TRỢ LÝ AI SMART 4.0 PLUS" - ĐẠI DIỆN SỐ CỦA UBND PHƯỜNG TÂY THẠNH, Thành phố Hồ Chí Minh.
@@ -37,66 +39,36 @@ MỤC TIÊU:
 Phản hồi đầy đủ, dễ hiểu, tạo cảm giác an tâm và hiện đại cho người dân thông qua các biểu tượng trực quan về Tốc độ và Bảo mật.`;
 
 export class GeminiService {
-  private apiKey: string = '';
-  private apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
+  private ai: GoogleGenAI;
 
-  setApiKey(key: string) {
-    this.apiKey = key;
+  constructor() {
+    this.ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
   }
 
-  getApiKey(): string {
-    return this.apiKey;
-  }
-
-  async sendMessage(history: Message[], userInput: string): Promise<string> {
-    if (!this.apiKey) {
-      throw new Error('API Key not set');
-    }
-
+  async sendMessage(history: Message[], userInput: string) {
     try {
-      const response = await fetch(`${this.apiUrl}?key=${this.apiKey}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await this.ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: {
+          parts: [
+            ...history.map(m => ({
+              text: `${m.role === 'model' ? 'Assistant:' : 'User:'} ${m.text}`
+            })),
+            { text: userInput }
+          ]
         },
-        body: JSON.stringify({
-          contents: [{
-            parts: [{
-              text: this.buildPrompt(history, userInput)
-            }]
-          }],
-          generationConfig: {
-            temperature: 0.3,
-            topP: 0.9,
-            maxOutputTokens: 1024,
-          },
-          systemInstruction: {
-            parts: [{
-              text: SYSTEM_INSTRUCTION
-            }]
-          }
-        })
+        config: {
+          systemInstruction: SYSTEM_INSTRUCTION,
+          temperature: 0.3, 
+          topP: 0.9,
+        },
       });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error?.message || 'API request failed');
-      }
-
-      const data = await response.json();
-      return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      return response.text;
     } catch (error) {
       console.error("Gemini API Error:", error);
       throw error;
     }
-  }
-
-  private buildPrompt(history: Message[], currentInput: string): string {
-    const conversationHistory = history.map(m => 
-      `${m.role === 'model' ? 'Assistant' : 'User'}: ${m.text}`
-    ).join('\n');
-    
-    return `${conversationHistory}\n\nUser: ${currentInput}`;
   }
 }
 
