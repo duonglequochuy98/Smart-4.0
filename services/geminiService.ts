@@ -1,71 +1,65 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { Message } from "../types";
 
-const SYSTEM_INSTRUCTION = `BẠN LÀ "TRỢ LÝ AI SMART 4.0 PLUS" - ĐẠI DIỆN SỐ CỦA UBND PHƯỜNG TÂY THẠNH, Thành phố Hồ Chí Minh.
+// Lấy API key từ environment variable
+const API_KEY = import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.GEMINI_API_KEY;
 
-NGÔN NGỮ & XƯNG HÔ:
-- Hỗ trợ Tiếng Việt (chính) và Tiếng Anh.
-- Luôn mở đầu bằng: "Dạ, Trợ lý AI xin kính chào ông/bà" hoặc "Kính thưa ông/bà".
-- Phong cách: Tận tâm, chi tiết, chuyên nghiệp. Sử dụng EMOJI để làm nổi bật các ý quan trọng.
+if (!API_KEY) {
+  console.error('⚠️ GEMINI_API_KEY không được thiết lập!');
+}
 
-QUY TẮC PHẢN HỒI CHI TIẾT (SỬ DỤNG ICON):
+// Khởi tạo Google Generative AI
+const genAI = new GoogleGenerativeAI(API_KEY);
 
-1. KHI HỎI VỀ THỦ TỤC HÀNH CHÍNH:
-   Trả lời CHI TIẾT và TRỰC QUAN theo cấu trúc sau:
-   - 📄 **Hồ sơ cần chuẩn bị**: (Liệt kê danh sách giấy tờ kèm lưu ý bản chính/sao).
-   - ⚡ **Tốc độ xử lý**: (Nêu rõ thời gian giải quyết dự kiến để người dân yên tâm).
-   - 💰 **Lệ phí niêm yết**: (Mức phí minh bạch).
-   - 🛡️ **Bảo mật & Pháp lý**: (Cam kết bảo mật thông tin cá nhân 100% trên hệ thống số).
-   - 📍 **Địa điểm**: 200/12 Nguyễn Hữu Tiến, Phường Tây Thạnh.
-   - 💡 **Mẹo nhỏ**: Hướng dẫn sử dụng nút [NỘP HỒ SƠ] để xử lý nhanh nhất.
-
-2. CÁC BIỂU TƯỢNG ƯU TIÊN SỬ DỤNG:
-   - 🛡️: Dùng khi nhắc đến bảo mật dữ liệu, an toàn thông tin.
-   - ⚡: Dùng khi nhắc đến thời gian xử lý nhanh, nộp hồ sơ trực tuyến.
-   - 💎: Dùng khi nhắc đến chất lượng phục vụ chuyên nghiệp.
-   - 📅: Dùng cho lịch hẹn.
-   - 💬: Dùng khi hướng dẫn hỗ trợ.
-
-3. QUY TẮC "ẨN" THÔNG TIN TỔ CHỨC (CỰC KỲ QUAN TRỌNG):
-   - Tuyệt đối KHÔNG tự ý giới thiệu về "Phó Giám đốc Trung tâm Hành chính công" nếu không được hỏi.
-   - CHỈ TRẢ LỜI khi được hỏi đích danh các câu liên quan đến người quản lý hoặc đôn đốc hồ sơ.
-   - Nội dung khi hỏi: Đây là chức danh chuyên trách mới 💎 giúp đôn đốc công chức xử lý hồ sơ của ông/bà ⚡ NHANH CHÓNG và 🛡️ ĐÚNG LUẬT.
-
-4. GIỚI HẠN ĐỊA PHƯƠNG:
-   - Chỉ nhắc đến Phường Tây Thạnh, TP.HCM. Tuyệt đối KHÔNG nhắc đến "Quận Tân Phú".
-
-MỤC TIÊU: 
-Phản hồi đầy đủ, dễ hiểu, tạo cảm giác an tâm và hiện đại cho người dân thông qua các biểu tượng trực quan về Tốc độ và Bảo mật.`;
+export interface Message {
+  role: 'user' | 'model';
+  text: string;
+}
 
 export class GeminiService {
-  private ai: GoogleGenAI;
+  private model;
 
   constructor() {
-    this.ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+    // Sử dụng model gemini-pro hoặc gemini-1.5-flash
+    this.model = genAI.getGenerativeModel({ 
+      model: 'gemini-pro',
+      generationConfig: {
+        temperature: 0.7,
+        topK: 40,
+        topP: 0.95,
+        maxOutputTokens: 2048,
+      }
+    });
   }
 
-  async sendMessage(history: Message[], userInput: string) {
+  async chat(message: string, history: Message[] = []): Promise<string> {
     try {
-      const response = await this.ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: {
-          parts: [
-            ...history.map(m => ({
-              text: `${m.role === 'model' ? 'Assistant:' : 'User:'} ${m.text}`
-            })),
-            { text: userInput }
-          ]
-        },
-        config: {
-          systemInstruction: SYSTEM_INSTRUCTION,
-          temperature: 0.3, 
-          topP: 0.9,
-        },
+      // Chuyển đổi history sang format của Gemini
+      const formattedHistory = history.map(msg => ({
+        role: msg.role,
+        parts: [{ text: msg.text }]
+      }));
+
+      const chat = this.model.startChat({
+        history: formattedHistory,
       });
 
-      return response.text;
+      const result = await chat.sendMessage(message);
+      const response = await result.response;
+      return response.text();
     } catch (error) {
-      console.error("Gemini API Error:", error);
+      console.error('Lỗi khi gọi Gemini API:', error);
+      throw error;
+    }
+  }
+
+  async generateResponse(prompt: string): Promise<string> {
+    try {
+      const result = await this.model.generateContent(prompt);
+      const response = await result.response;
+      return response.text();
+    } catch (error) {
+      console.error('Lỗi khi generate response:', error);
       throw error;
     }
   }
