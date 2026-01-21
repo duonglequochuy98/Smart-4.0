@@ -48,13 +48,11 @@ const SUGGESTIONS = {
   vi: [
     "Thủ tục làm Khai sinh?",
     "Địa chỉ UBND Phường ở đâu?",
-    "Làm sao để đặt lịch hẹn?",
     "Phí chứng thực bản sao?"
   ],
   en: [
     "Birth registration process?",
     "Where is the Ward Office?",
-    "How to book an appointment?",
     "Notarization service fees?"
   ]
 };
