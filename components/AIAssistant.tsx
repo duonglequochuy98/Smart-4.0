@@ -65,7 +65,7 @@ const UI_TEXT = {
   vi: {
     title: 'Trợ lý',
     placeholder: 'Nhập câu hỏi của ông/bà...',
-    thinking: 'AI đang xử lý...',
+    thinking: 'Trợ lý đang xử lý',
     welcome: 'Kính chào ông/bà, tôi là Trợ lý AI Smart 4.0 Plus của Phường Tây Thạnh. Tôi có thể giúp gì cho ông/bà hôm nay?',
     confirm: 'Xác nhận',
     personalization: 'Cá nhân hóa AI'
@@ -73,7 +73,7 @@ const UI_TEXT = {
   en: {
     title: 'Assistant',
     placeholder: 'Type your question here...',
-    thinking: 'AI is thinking...',
+    thinking: 'AI is thinking',
     welcome: 'Welcome, I am the Smart 4.0 Plus AI Assistant of Tay Thanh Ward. How can I assist you today?',
     confirm: 'Confirm',
     personalization: 'AI Personalization'
@@ -98,7 +98,6 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ onBack }) => {
     }
   }, [messages, isLoading]);
 
-  // Update welcome message when language changes if no conversation started
   useEffect(() => {
     if (messages.length === 1) {
       setMessages([{ role: 'model', text: UI_TEXT[lang].welcome }]);
@@ -115,7 +114,6 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ onBack }) => {
     setIsLoading(true);
 
     try {
-      // Pass the selected language to the service to guide the AI
       const langInstruction = lang === 'en' ? "Please respond in English." : "Hãy phản hồi bằng tiếng Việt.";
       const reply = await geminiService.sendMessage(messages, `${langInstruction} User input: ${textToSend}`);
       setMessages(prev => [...prev, { role: 'model', text: reply || (lang === 'vi' ? 'Xin lỗi, tôi gặp sự cố.' : 'Sorry, I encountered an error.') }]);
@@ -148,7 +146,6 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ onBack }) => {
 
   return (
     <div className="flex flex-col h-full bg-white relative">
-      {/* Header */}
       <div className="p-4 border-b flex items-center justify-between bg-red-600 text-white shadow-md z-10">
         <div className="flex items-center gap-3">
           <button onClick={onBack} className="p-1 hover:bg-white/10 rounded-full transition-colors">
@@ -173,7 +170,6 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ onBack }) => {
           </div>
         </div>
         
-        {/* Language Switcher */}
         <div className="flex bg-red-700/50 p-1 rounded-xl border border-white/10">
           <button 
             onClick={() => setLang('vi')}
@@ -190,7 +186,6 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ onBack }) => {
         </div>
       </div>
 
-      {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50 no-scrollbar" ref={scrollRef}>
         {messages.map((m, i) => (
           <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-2 duration-300`}>
@@ -221,30 +216,33 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ onBack }) => {
           </div>
         ))}
         {isLoading && (
-          <div className="flex justify-start">
+          <div className="flex justify-start animate-in fade-in duration-300">
             <div className="flex gap-2.5 items-start">
-              <div className={`w-8 h-8 rounded-lg ${selectedAvatar.color} text-white flex items-center justify-center shadow-sm mt-1 animate-bounce`}>
+              <div className={`w-8 h-8 rounded-lg ${selectedAvatar.color} text-white flex items-center justify-center shadow-lg mt-1 animate-bounce shadow-red-500/20`}>
                 <Sparkles size={16} />
               </div>
-              <div className="bg-white border border-red-50 px-4 py-3 rounded-[20px] rounded-tl-none shadow-md flex flex-col gap-2 min-w-[160px] relative overflow-hidden">
-                <div className="flex items-center gap-2">
-                  <div className="flex gap-1">
-                    <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-bounce [animation-duration:0.6s]"></span>
-                    <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-bounce [animation-duration:0.6s] [animation-delay:0.2s]"></span>
-                    <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-bounce [animation-duration:0.6s] [animation-delay:0.4s]"></span>
+              <div className="bg-white border border-red-50 px-5 py-3.5 rounded-[24px] rounded-tl-none shadow-xl flex flex-col gap-2.5 min-w-[180px] relative overflow-hidden group">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 via-amber-500 to-red-500 animate-[loading-shimmer_2s_infinite_linear] bg-[length:200%_100%]"></div>
+                <div className="flex items-center gap-3">
+                   <div className="flex gap-1 items-center">
+                    <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-[loading-dot_1.4s_infinite_ease-in-out]"></span>
+                    <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-[loading-dot_1.4s_infinite_ease-in-out_0.2s]"></span>
+                    <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-[loading-dot_1.4s_infinite_ease-in-out_0.4s]"></span>
                   </div>
-                  <span className="text-[10px] font-black text-red-600 uppercase tracking-widest">{UI_TEXT[lang].thinking}</span>
+                  <span className="text-[11px] font-black text-red-600 uppercase tracking-[0.15em] flex items-center">
+                    {UI_TEXT[lang].thinking}
+                    <span className="inline-flex w-4 ml-0.5">
+                       <span className="animate-[ellipsis_1.5s_infinite] after:content-['...']"></span>
+                    </span>
+                  </span>
                 </div>
-                <div className="h-1 w-full bg-slate-100 rounded-full overflow-hidden">
-                  <div className="h-full bg-red-600 w-1/3 rounded-full animate-[loading-slide_1.5s_infinite_ease-in-out]"></div>
-                </div>
+                <p className="text-[10px] font-bold text-slate-400 italic">Hệ thống đang tìm kiếm dữ liệu tốt nhất</p>
               </div>
             </div>
           </div>
         )}
       </div>
 
-      {/* Suggestions & Input */}
       <div className="p-4 border-t bg-white space-y-3">
         {messages.length < 5 && !isLoading && (
           <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
@@ -280,7 +278,6 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ onBack }) => {
         </div>
       </div>
 
-      {/* Avatar Picker Modal */}
       {showAvatarPicker && (
         <div className="absolute inset-0 z-[100] animate-in fade-in duration-300">
           <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setShowAvatarPicker(false)}></div>
@@ -336,9 +333,19 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ onBack }) => {
       )}
 
       <style>{`
-        @keyframes loading-slide {
-          0% { transform: translateX(-100%); }
-          100% { transform: translateX(300%); }
+        @keyframes loading-shimmer {
+          0% { background-position: -200% 0; }
+          100% { background-position: 200% 0; }
+        }
+        @keyframes loading-dot {
+          0%, 80%, 100% { transform: scale(0); opacity: 0.5; }
+          40% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes ellipsis {
+          0% { opacity: 0; }
+          25% { opacity: 1; }
+          50% { opacity: 0; }
+          100% { opacity: 0; }
         }
         .no-scrollbar::-webkit-scrollbar { display: none !important; }
         .no-scrollbar { -ms-overflow-style: none !important; scrollbar-width: none !important; }

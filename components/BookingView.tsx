@@ -1,11 +1,11 @@
 
+import { ArrowLeft, Calendar, Clock, ChevronRight, CheckCircle2, User, Phone, FileText, Download, ShieldCheck, MapPin, Edit3, Barcode, Info, Home, Sparkles, CreditCard, AlertCircle } from 'lucide-react';
 import React, { useState, useMemo, useEffect } from 'react';
-import { ArrowLeft, Calendar, Clock, ChevronRight, CheckCircle2, User, Phone, FileText, Download, ShieldCheck, MapPin, Edit3, Barcode, Info, Home, Sparkles, CreditCard } from 'lucide-react';
 import { NewsItem } from '../App';
 
 interface BookingViewProps {
-  onBack: () => void;
   onAddNotification: (news: NewsItem) => void;
+  onBack: () => void;
 }
 
 const SERVICES = [
@@ -264,9 +264,11 @@ export const BookingView: React.FC<BookingViewProps> = ({ onBack, onAddNotificat
     }, 1000);
   };
 
+  // Logic kiểm tra nút Xác nhận có bị vô hiệu hóa không
+  const isCccdValid = formData.cccd.length === 12;
   const isConfirmDisabled = 
     !formData.name.trim() || 
-    formData.cccd.length !== 12 || 
+    !isCccdValid || 
     !formData.phone.trim() || 
     isProcessing;
 
@@ -406,7 +408,6 @@ export const BookingView: React.FC<BookingViewProps> = ({ onBack, onAddNotificat
               <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
                 <div className="flex justify-between items-center px-1">
                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">3. Chọn khung giờ</p>
-                  {isSelectedToday && <span className="text-[9px] font-bold text-slate-400 italic">Khung giờ đã qua bị ẩn</span>}
                 </div>
                 {filteredTimeSlots.length > 0 ? (
                   <div className="grid grid-cols-3 gap-2">
@@ -466,7 +467,13 @@ export const BookingView: React.FC<BookingViewProps> = ({ onBack, onAddNotificat
                <div className="space-y-3">
                  <div className="relative group">
                    <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                   <input type="text" placeholder="Họ và tên" value={formData.name} className="w-full h-14 bg-white border border-slate-200 rounded-2xl pl-12 pr-4 text-sm font-bold focus:border-red-500 outline-none" onChange={(e) => setFormData({...formData, name: e.target.value})} />
+                   <input 
+                    type="text" 
+                    placeholder="Họ và tên" 
+                    value={formData.name} 
+                    className="w-full h-14 bg-white border border-slate-200 rounded-2xl pl-12 pr-4 text-sm font-bold focus:border-red-500 outline-none" 
+                    onChange={(e) => setFormData({...formData, name: e.target.value})} 
+                  />
                  </div>
                  <div className="relative group">
                    <CreditCard className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
@@ -476,17 +483,30 @@ export const BookingView: React.FC<BookingViewProps> = ({ onBack, onAddNotificat
                       maxLength={12} 
                       placeholder="Số CCCD (Bắt buộc 12 số)" 
                       value={formData.cccd} 
-                      className={`w-full h-14 bg-white border rounded-2xl pl-12 pr-4 text-sm font-bold outline-none transition-all ${formData.cccd.length > 0 && formData.cccd.length < 12 ? 'border-amber-400 ring-4 ring-amber-400/10' : 'border-slate-200 focus:border-red-500'}`} 
+                      className={`w-full h-14 bg-white border rounded-2xl pl-12 pr-4 text-sm font-bold outline-none transition-all ${
+                        formData.cccd.length > 0 && !isCccdValid 
+                        ? 'border-amber-400 ring-4 ring-amber-400/10' 
+                        : 'border-slate-200 focus:border-red-500'
+                      }`} 
                       onChange={(e) => setFormData({...formData, cccd: e.target.value.replace(/\D/g, '')})} 
                     />
-                    {formData.cccd.length > 0 && formData.cccd.length < 12 && (
-                      <span className="absolute -bottom-5 left-1 text-[9px] font-black text-amber-600 uppercase">Cần nhập đủ 12 số ({formData.cccd.length}/12)</span>
+                    {formData.cccd.length > 0 && !isCccdValid && (
+                      <div className="absolute -bottom-6 left-1 flex items-center gap-1">
+                        <AlertCircle size={10} className="text-amber-600" />
+                        <span className="text-[9px] font-black text-amber-600 uppercase">Cần nhập đủ 12 số ({formData.cccd.length}/12)</span>
+                      </div>
                     )}
                    </div>
                  </div>
-                 <div className="relative group pt-2">
+                 <div className="relative group pt-3">
                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                   <input type="tel" placeholder="Số điện thoại" value={formData.phone} className="w-full h-14 bg-white border border-slate-200 rounded-2xl pl-12 pr-4 text-sm font-bold focus:border-red-500 outline-none" onChange={(e) => setFormData({...formData, phone: e.target.value})} />
+                   <input 
+                    type="tel" 
+                    placeholder="Số điện thoại" 
+                    value={formData.phone} 
+                    className="w-full h-14 bg-white border border-slate-200 rounded-2xl pl-12 pr-4 text-sm font-bold focus:border-red-500 outline-none" 
+                    onChange={(e) => setFormData({...formData, phone: e.target.value})} 
+                  />
                  </div>
                </div>
              </div>
@@ -499,7 +519,11 @@ export const BookingView: React.FC<BookingViewProps> = ({ onBack, onAddNotificat
                <button 
                 disabled={isConfirmDisabled} 
                 onClick={handleComplete} 
-                className="flex-[2] h-14 bg-red-600 text-white rounded-2xl font-bold text-sm shadow-xl shadow-red-600/20 active:scale-95 transition-all flex items-center justify-center disabled:opacity-40"
+                className={`flex-[2] h-14 rounded-2xl font-bold text-sm shadow-xl transition-all flex items-center justify-center ${
+                  isConfirmDisabled 
+                  ? 'bg-slate-200 text-slate-400 shadow-none cursor-not-allowed' 
+                  : 'bg-red-600 text-white shadow-red-600/20 active:scale-95'
+                }`}
                >
                 Xác nhận
                </button>
