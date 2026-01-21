@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ArrowLeft, FileText, ChevronRight, Info, ShieldCheck, ExternalLink, Zap, HeartHandshake } from 'lucide-react';
+import { ArrowLeft, FileText, ChevronRight, HeartHandshake, Zap, ExternalLink } from 'lucide-react';
 
 interface SubmissionViewProps {
   onBack: () => void;
@@ -23,7 +23,16 @@ const PROCEDURES = [
     time: '7 ngày làm việc', 
     fee: 'Miễn phí', 
     hot: true,
-    url: 'https://dichvucong.gov.vn/p/home/dvc-ket-qua-thu-tuc.html?originKey=b%E1%BA%A3o%20tr%E1%BB%A3%20x%C3%A3%20h%E1%BB%99i&tukhoa=b%E1%BA%A3o%20tr%E1%BB%A3%20x%C3%A3%20h%E1%BB%99i&tinh_thanh='
+    url: 'https://dichvucong.hochiminhcity.gov.vn/vi/thu-tuc-hanh-chinh/chi-tiet?ma=1.000494.000.00.00.H29'
+  },
+  { 
+    id: 5, 
+    name: 'Chứng thực bản sao từ bản chính các giấy tờ, văn bản', 
+    category: 'Chứng thực', 
+    time: '1 giờ', 
+    fee: '2.000đ/trang', 
+    hot: true,
+    url: 'https://dichvucong.hochiminhcity.gov.vn/vi/thu-tuc-hanh-chinh/chi-tiet?ma=1.000300.000.00.00.H29'
   },
   { 
     id: 3, 
@@ -41,9 +50,8 @@ const PROCEDURES = [
     time: '3 ngày làm việc', 
     fee: 'Miễn phí', 
     hot: false,
-    url: 'https://dichvucong.gov.vn/p/home/dvc-ket-qua-thu-tuc.html?originKey=b%E1%BA%A3o%20tr%E1%BB%A3%20x%C3%A3%20h%E1%BB%99i&tukhoa=b%E1%BA%A3o%20tr%E1%BB%A3%20x%C3%A3%20h%E1%BB%99i&tinh_thanh='
+    url: 'https://dichvucong.hochiminhcity.gov.vn/vi/thu-tuc-hanh-chinh/chi-tiet?ma=1.000497.000.00.00.H29'
   },
-  { id: 5, name: 'Chứng thực bản sao từ bản chính các giấy tờ, văn bản', category: 'Chứng thực', time: '1 giờ', fee: '2.000đ/trang', hot: true, url: 'https://dichvucong.gov.vn/p/home/dvc-danh-sach-dich-vu-cong.html?tu_khoa=&bo_nganh=&tinh_thanh=Th%C3%A0nh%20ph%E1%BB%91%20H%E1%BB%93%20Ch%C3%AD%20Minh&so=&quan_huyen=Ph%C6%B0%E1%BB%9Dng%20T%C3%A2y%20Th%E1%BA%A1nh&phuong_xa=&ma_tt=2.000815&id_tinh_thanh=13460&id_quan_huyen=22024&id_phuong_xa=undefined&id_so=null&id_bo_nganh=-1' },
 ];
 
 export const SubmissionView: React.FC<SubmissionViewProps> = ({ onBack }) => {
@@ -66,7 +74,7 @@ export const SubmissionView: React.FC<SubmissionViewProps> = ({ onBack }) => {
         <h2 className="text-lg font-black text-slate-800 tracking-tight">Nộp hồ sơ trực tuyến</h2>
       </div>
 
-      <div className="p-5 space-y-6 flex-1 overflow-y-auto">
+      <div className="p-5 space-y-6 flex-1 overflow-y-auto no-scrollbar">
         {/* Notice Card */}
         <div className="bg-gradient-to-br from-red-50 to-orange-50 p-4 rounded-2xl border border-red-100/50 flex gap-4 shadow-sm">
           <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center text-red-600 shrink-0 shadow-sm">
@@ -111,9 +119,11 @@ export const SubmissionView: React.FC<SubmissionViewProps> = ({ onBack }) => {
                 </div>
 
                 <div className="flex-1 min-w-0 pr-2">
-                  <h4 className="text-[15px] font-bold text-slate-800 group-hover:text-red-600 leading-[1.4] transition-colors mb-2 whitespace-normal break-words">
-                    {p.name}
-                  </h4>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h4 className="text-[14px] font-bold text-slate-800 group-hover:text-red-600 leading-[1.4] transition-colors whitespace-normal break-words">
+                      {p.name}
+                    </h4>
+                  </div>
                   <div className="flex flex-wrap gap-2 items-center">
                     <span className={`text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider ${
                       p.category === 'Bảo trợ xã hội' ? 'bg-rose-100 text-rose-700' : 'bg-slate-100 text-slate-500'
@@ -123,10 +133,6 @@ export const SubmissionView: React.FC<SubmissionViewProps> = ({ onBack }) => {
                     <div className="flex items-center gap-1.5">
                       <div className="w-1 h-1 bg-slate-300 rounded-full"></div>
                       <span className="text-[11px] text-emerald-600 font-bold">{p.fee}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-1 h-1 bg-slate-300 rounded-full"></div>
-                      <span className="text-[11px] text-slate-400 font-medium">{p.time}</span>
                     </div>
                   </div>
                 </div>
@@ -145,7 +151,7 @@ export const SubmissionView: React.FC<SubmissionViewProps> = ({ onBack }) => {
       {/* Footer Button */}
       <div className="p-5 bg-white border-t">
         <button 
-          onClick={() => handleProcedureClick('https://thutuc.dichvucong.gov.vn/p/home/dvc-tthc-trang-chu.html')}
+          onClick={() => window.open('https://thutuc.dichvucong.gov.vn/p/home/dvc-tthc-trang-chu.html', '_blank')}
           className="w-full h-12 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-[13px] font-black flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
         >
           Tất cả danh mục thủ tục
