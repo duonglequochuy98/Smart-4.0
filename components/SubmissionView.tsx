@@ -23,7 +23,7 @@ const PROCEDURES = [
     time: '7 ngày làm việc', 
     fee: 'Miễn phí', 
     hot: true,
-    url: 'https://dichvucong.hochiminhcity.gov.vn/vi/thu-tuc-hanh-chinh/chi-tiet?ma=1.000494.000.00.00.H29'
+    url: 'https://dichvucong.gov.vn/p/home/dvc-ket-qua-thu-tuc.html?originKey=b%E1%BA%A3o%20tr%E1%BB%A3%20x%C3%A3%20h%E1%BB%99i&tukhoa=b%E1%BA%A3o%20tr%E1%BB%A3%20x%C3%A3%20h%E1%BB%99i&tinh_thanh='
   },
   { 
     id: 3, 
@@ -41,7 +41,7 @@ const PROCEDURES = [
     time: '3 ngày làm việc', 
     fee: 'Miễn phí', 
     hot: false,
-    url: 'https://dichvucong.hochiminhcity.gov.vn/vi/thu-tuc-hanh-chinh/chi-tiet?ma=1.000497.000.00.00.H29'
+    url: 'https://dichvucong.gov.vn/p/home/dvc-ket-qua-thu-tuc.html?originKey=b%E1%BA%A3o%20tr%E1%BB%A3%20x%C3%A3%20h%E1%BB%99i&tukhoa=b%E1%BA%A3o%20tr%E1%BB%A3%20x%C3%A3%20h%E1%BB%99i&tinh_thanh='
   },
   { id: 5, name: 'Chứng thực bản sao từ bản chính các giấy tờ, văn bản', category: 'Chứng thực', time: '1 giờ', fee: '2.000đ/trang', hot: true, url: 'https://dichvucong.gov.vn/p/home/dvc-danh-sach-dich-vu-cong.html?tu_khoa=&bo_nganh=&tinh_thanh=Th%C3%A0nh%20ph%E1%BB%91%20H%E1%BB%93%20Ch%C3%AD%20Minh&so=&quan_huyen=Ph%C6%B0%E1%BB%9Dng%20T%C3%A2y%20Th%E1%BA%A1nh&phuong_xa=&ma_tt=2.000815&id_tinh_thanh=13460&id_quan_huyen=22024&id_phuong_xa=undefined&id_so=null&id_bo_nganh=-1' },
 ];
