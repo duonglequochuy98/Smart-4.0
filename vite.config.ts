@@ -5,7 +5,6 @@ import react from '@vitejs/plugin-react';
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, '.', '');
     return {
-      base: './',  // ← THÊM DÒNG NÀY
       server: {
         port: 3000,
         host: '0.0.0.0',
@@ -19,15 +18,7 @@ export default defineConfig(({ mode }) => {
         alias: {
           '@': path.resolve(__dirname, '.'),
         }
-      },
-      build: {  // ← THÊM SECTION NÀY
-        outDir: 'dist',
-        assetsDir: 'assets',
-        rollupOptions: {
-          output: {
-            manualChunks: undefined,
-          }
-        }
       }
     };
 });
+
