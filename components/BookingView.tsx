@@ -17,7 +17,7 @@ const SERVICES = [
   "Đăng ký hộ kinh doanh",
   "Khác (Tư vấn hành chính)"
 ];
-
+const WEBHOOK_URL = "https://hook.eu1.make.com/z6234ce9gbg3q0xtvog55olfyunuvn2s";
 const ALL_TIME_SLOTS = [
   "07:30 - 08:00", "08:00 - 08:30", "08:30 - 09:00", "09:00 - 09:30",
   "09:30 - 10:00", "10:00 - 10:30", "10:30 - 11:00", "11:00 - 11:30",
