@@ -32,3 +32,15 @@ dist-ssr
 
 # Vercel
 .vercel
+
+# OS
+Thumbs.db
+
+# Dependencies
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Build
+build/
+.cache/
