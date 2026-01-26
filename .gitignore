@@ -12,6 +12,13 @@ dist
 dist-ssr
 *.local
 
+# Environment variables - QUAN TRỌNG!
+.env
+.env.local
+.env.production
+.env.development
+.env*.local
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -22,3 +29,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Vercel
+.vercel
