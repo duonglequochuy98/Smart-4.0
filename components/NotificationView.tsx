@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo, memo } from 'react';
 import { ArrowLeft, Bell, Calendar, ChevronRight, Megaphone, Info, Search, CalendarCheck, X, ShieldCheck, Barcode } from 'lucide-react';
 import { NewsItem } from '../App';
 
@@ -9,13 +9,82 @@ interface NotificationViewProps {
   setNotifications: React.Dispatch<React.SetStateAction<NewsItem[]>>;
 }
 
+interface NewsCardProps {
+  news: NewsItem;
+  onClick: (item: NewsItem) => void;
+}
+
+const NewsCard = memo(({ news, onClick }: NewsCardProps) => {
+  return (
+    <button 
+      onClick={() => onClick(news)}
+      className={`w-full text-left p-4 rounded-[24px] border transition-all active:scale-[0.98] relative overflow-hidden flex gap-4 ${
+        news.isRead ? 'bg-white border-slate-100' : 'bg-white border-red-100 shadow-sm'
+      }`}
+    >
+      {!news.isRead && (
+        <div className="absolute top-0 left-0 w-1 h-full bg-red-600"></div>
+      )}
+      
+      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${
+        news.isBooking ? 'bg-emerald-50 text-emerald-600' :
+        news.category === 'Thông báo' ? 'bg-orange-50 text-orange-600' :
+        news.category === 'Sự kiện' ? 'bg-blue-50 text-blue-600' : 'bg-emerald-50 text-emerald-600'
+      }`}>
+        {news.isBooking ? <CalendarCheck size={22} /> :
+         news.category === 'Thông báo' ? <Megaphone size={22} /> :
+         news.category === 'Sự kiện' ? <Calendar size={22} /> : <Info size={22} />}
+      </div>
+
+      <div className="flex-1 space-y-2">
+        <div className="flex items-center justify-between">
+          <span className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded ${
+            news.isBooking ? 'bg-emerald-100 text-emerald-700' :
+            news.category === 'Thông báo' ? 'bg-orange-100 text-orange-700' :
+            news.category === 'Sự kiện' ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700'
+          }`}>
+            {news.isBooking ? 'Lịch hẹn' : news.category}
+          </span>
+          <span className="text-[10px] font-bold text-slate-400">{news.date}</span>
+        </div>
+        
+        <h3 className={`text-sm font-bold leading-tight ${news.isRead ? 'text-slate-600 font-semibold' : 'text-slate-900 font-bold'}`}>
+          {news.title}
+          {news.isImportant && (
+            <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded bg-red-50 text-red-600 text-[8px] font-black uppercase">Quan trọng</span>
+          )}
+        </h3>
+        
+        <p className="text-[11px] text-slate-500 line-clamp-2 leading-relaxed font-medium">
+          {news.summary}
+        </p>
+
+        <div className="flex items-center gap-1 text-red-600 text-[10px] font-bold pt-1">
+          {news.isBooking ? 'Xem phiếu hẹn' : 'Xem chi tiết'}
+          <ChevronRight size={12} strokeWidth={3} />
+        </div>
+      </div>
+    </button>
+  );
+});
+
 export const NotificationView: React.FC<NotificationViewProps> = ({ onBack, notifications, setNotifications }) => {
   const [activeCategory, setActiveCategory] = useState<string>('Tất cả');
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedBooking, setSelectedBooking] = useState<NewsItem['bookingData'] | null>(null);
 
-  const filteredNews = activeCategory === 'Tất cả' 
-    ? notifications 
-    : notifications.filter(n => n.category === activeCategory);
+  const filteredNews = useMemo(() => {
+    let list = activeCategory === 'Tất cả' 
+      ? notifications 
+      : notifications.filter(n => n.category === activeCategory);
+    
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      list = list.filter(n => n.title.toLowerCase().includes(q) || n.summary.toLowerCase().includes(q));
+    }
+    
+    return list;
+  }, [notifications, activeCategory, searchQuery]);
 
   const handleNewsClick = (item: NewsItem) => {
     setNotifications(prev => prev.map(n => n.id === item.id ? { ...n, isRead: true } : n));
@@ -50,6 +119,8 @@ export const NotificationView: React.FC<NotificationViewProps> = ({ onBack, noti
           <input 
             type="text" 
             placeholder="Tìm kiếm tin tức..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full h-12 bg-white border border-slate-200 rounded-2xl pl-11 pr-4 text-sm focus:outline-none focus:ring-4 focus:ring-red-600/5 focus:border-red-600 transition-all font-medium"
           />
         </div>
@@ -79,56 +150,7 @@ export const NotificationView: React.FC<NotificationViewProps> = ({ onBack, noti
           </div>
         ) : (
           filteredNews.map((news) => (
-            <button 
-              key={news.id}
-              onClick={() => handleNewsClick(news)}
-              className={`w-full text-left p-4 rounded-[24px] border transition-all active:scale-[0.98] relative overflow-hidden flex gap-4 ${
-                news.isRead ? 'bg-white border-slate-100' : 'bg-white border-red-100 shadow-sm'
-              }`}
-            >
-              {!news.isRead && (
-                <div className="absolute top-0 left-0 w-1 h-full bg-red-600"></div>
-              )}
-              
-              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${
-                news.isBooking ? 'bg-emerald-50 text-emerald-600' :
-                news.category === 'Thông báo' ? 'bg-orange-50 text-orange-600' :
-                news.category === 'Sự kiện' ? 'bg-blue-50 text-blue-600' : 'bg-emerald-50 text-emerald-600'
-              }`}>
-                {news.isBooking ? <CalendarCheck size={22} /> :
-                 news.category === 'Thông báo' ? <Megaphone size={22} /> :
-                 news.category === 'Sự kiện' ? <Calendar size={22} /> : <Info size={22} />}
-              </div>
-
-              <div className="flex-1 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded ${
-                    news.isBooking ? 'bg-emerald-100 text-emerald-700' :
-                    news.category === 'Thông báo' ? 'bg-orange-100 text-orange-700' :
-                    news.category === 'Sự kiện' ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700'
-                  }`}>
-                    {news.isBooking ? 'Lịch hẹn' : news.category}
-                  </span>
-                  <span className="text-[10px] font-bold text-slate-400">{news.date}</span>
-                </div>
-                
-                <h3 className={`text-sm font-bold leading-tight ${news.isRead ? 'text-slate-600 font-semibold' : 'text-slate-900 font-bold'}`}>
-                  {news.title}
-                  {news.isImportant && (
-                    <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded bg-red-50 text-red-600 text-[8px] font-black uppercase">Quan trọng</span>
-                  )}
-                </h3>
-                
-                <p className="text-[11px] text-slate-500 line-clamp-2 leading-relaxed font-medium">
-                  {news.summary}
-                </p>
-
-                <div className="flex items-center gap-1 text-red-600 text-[10px] font-bold pt-1">
-                  {news.isBooking ? 'Xem phiếu hẹn' : 'Xem chi tiết'}
-                  <ChevronRight size={12} strokeWidth={3} />
-                </div>
-              </div>
-            </button>
+            <NewsCard key={news.id} news={news} onClick={handleNewsClick} />
           ))
         )}
       </div>

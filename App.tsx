@@ -158,7 +158,7 @@ const App: React.FC = () => {
           </button>
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-white border border-slate-100 rounded-2xl flex items-center justify-center overflow-hidden shadow-sm">
-               <img src={LOGO_URL} alt="Logo" className="w-full h-full object-cover" />
+               <img src={LOGO_URL} alt="Logo" className="w-full h-full object-cover" loading="lazy" />
             </div>
             <div>
               <h2 className="font-black text-[14px] text-slate-800 leading-none">Chào {userName.split(' ').pop() || 'Ông/Bà'}</h2>
@@ -176,7 +176,7 @@ const App: React.FC = () => {
       
       <div className="px-6 py-8 flex flex-col items-center">
         <div className="relative w-24 aspect-square rounded-[32px] bg-white border-4 border-white overflow-hidden flex items-center justify-center mb-6 shadow-xl">
-          <img src={LOGO_URL} alt="Logo" className="w-full h-full object-cover" />
+          <img src={LOGO_URL} alt="Logo" className="w-full h-full object-cover" loading="lazy" />
         </div>
         <div className="text-center space-y-2 mb-8">
            <h1 className="text-xl font-black text-slate-900 leading-tight">
@@ -229,6 +229,7 @@ const App: React.FC = () => {
           src="https://iwater.vn/Image/Picture/New/UBND-phuong-tay-thanh-tan-phu.jpg" 
           alt="UBND Phường Tây Thạnh" 
           className="w-full h-full object-cover" 
+          loading="lazy"
         />
         {/* White fade gradient - Move it down slightly so it doesn't cover the logo */}
         <div className="absolute inset-0 bg-gradient-to-t from-white via-white/5 to-transparent"></div>
@@ -236,7 +237,7 @@ const App: React.FC = () => {
         {/* Center Logo Area - Positioned in absolute center of the image area */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
            <div className="w-24 h-24 bg-red-600 rounded-[28px] shadow-2xl flex items-center justify-center p-0 overflow-hidden border-[5px] border-white relative z-20">
-             <img src={LOGO_URL} alt="Logo" className="w-full h-full object-cover" />
+             <img src={LOGO_URL} alt="Logo" className="w-full h-full object-cover" loading="lazy" />
            </div>
         </div>
       </div>
